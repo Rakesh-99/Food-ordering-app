@@ -1,0 +1,55 @@
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { Suspense, lazy } from "react";
+import Layout from "./components/layout/Layout";
+
+const Home = lazy(() => import("./pages/Home"));
+const Signup = lazy(() => import("./auth/Signup"));
+const Login = lazy(() => import("./auth/Login"));
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: (
+      <Suspense fallback={<div>Loading..</div>}>
+        <Layout />
+      </Suspense>
+    ),
+    children: [
+      {
+        index: true,
+
+        element: (
+          <Suspense fallback={<div>Loading..</div>}>
+            <Home />
+          </Suspense>
+        ),
+      },
+      {
+        path: "signup",
+        element: (
+          <Suspense fallback={<div>Loading..</div>}>
+            <Signup />
+          </Suspense>
+        ),
+      },
+      {
+        path: "login",
+        element: (
+          <Suspense fallback={<div>Loading...</div>}>
+            <Login />
+          </Suspense>
+        ),
+      },
+    ],
+  },
+]);
+
+const App = () => {
+  return (
+    <>
+      <RouterProvider router={router} />
+    </>
+  );
+};
+
+export default App;
