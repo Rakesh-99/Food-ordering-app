@@ -2,9 +2,15 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import Layout from "./components/layout/Layout";
 
+
+
 const Home = lazy(() => import("./pages/Home"));
 const Signup = lazy(() => import("./auth/Signup"));
 const Login = lazy(() => import("./auth/Login"));
+const ForgetPassword = lazy(() => import("./auth/ForgetPassword"));
+const ResetPassword = lazy(() => import("./auth/ResetPassword"));
+const VerifyOTP = lazy(() => import("./auth/VerifyOTP"));
+
 
 const router = createBrowserRouter([
   {
@@ -40,6 +46,30 @@ const router = createBrowserRouter([
           </Suspense>
         ),
       },
+      {
+        path: "forget-password",
+        element: (
+          <Suspense fallback={<div>Loading..</div>}>
+            <ForgetPassword />
+          </Suspense>
+        )
+      },
+      {
+        path: "reset-password",
+        element: (
+          <Suspense fallback={<div>Loading..</div>}>
+            <ResetPassword />
+          </Suspense>
+        )
+      },
+      {
+        path: "verify-otp",
+        element: (
+          <Suspense fallback={<div>Loading..</div>}>
+            <VerifyOTP />
+          </Suspense>
+        )
+      }
     ],
   },
 ]);
