@@ -3,16 +3,18 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Separator } from "../components/ui/separator";
 import { ChangeEvent, FormEvent, useState } from "react";
-import { NavLink } from "react-router-dom";
-import { loginDataType } from "../schema/user";
+import { Link, NavLink } from "react-router-dom";
+import { loginDataType, userLoginSchema } from "../schema-zod/user";
 
-type loadingState = boolean;
-type passwordVisibility = boolean;
+
 
 const Login = () => {
-  const [loading] = useState<loadingState>(false);
 
-  const [hidePassword, setHidePassword] = useState<passwordVisibility>(true);
+  const [loading] = useState<boolean>(false);
+
+  const [formError, setFormError] = useState<Partial<loginDataType>>();
+
+  const [hidePassword, setHidePassword] = useState<boolean>(true);
 
   const [loginInputData, setLoginInputData] = useState<loginDataType>({
     email: "",
@@ -26,13 +28,24 @@ const Login = () => {
 
   const formSubmitHandle = (e: FormEvent) => {
     e.preventDefault();
-    console.log(loginInputData);
+
+    // Form validation using zod
+
+    const result = userLoginSchema.safeParse(loginInputData);
+
+    if (result.error) {
+      const catchErr = result.error.formErrors.fieldErrors;
+      setFormError(catchErr as Partial<loginDataType>);
+      return false;
+    } else if (result.success) {
+      console.log("Hello World");
+    }
   };
 
   return (
     <>
       <div className="w-full select-none flex-col h-screen flex justify-center items-center">
-        <h1 className="text-4xl font-bold my-10">Welcome back</h1>
+        <h1 className="text-4xl text-gray-600 font-bold my-10">Welcome back</h1>
 
         {/* Form  */}
         <form
@@ -51,6 +64,9 @@ const Login = () => {
               onChange={inputChangeHandle}
             />
             <Mail className="absolute inset-y-2 left-2 text-gray-500 w-5 h-5 pointer-events-none" />
+            {formError && (
+              <p className="text-xs text-red-500">{formError.email}</p>
+            )}
           </div>
 
           {/* Password  */}
@@ -78,6 +94,9 @@ const Login = () => {
             )}
 
             <LockKeyhole className="absolute inset-y-2 left-2 text-gray-500 w-5 h-5 pointer-events-none" />
+            {formError && (
+              <p className="text-red-500 text-xs">{formError.password}</p>
+            )}
           </div>
           <div className="transition-all duration-1000">
             {loading ? (
@@ -96,6 +115,13 @@ const Login = () => {
                 Login
               </Button>
             )}
+          </div>
+
+          {/* Forget password  */}
+          <div className="my-3 flex items-center gap-1">
+
+            <p>Forget password ?</p>
+            <Link to={'/forget-password'} className="text-blue-500 hover:text-blue-400 transition-all hover:underline">click </Link>
           </div>
 
           <Separator className="my-5" />
