@@ -12,17 +12,28 @@ import { Input } from "../components/ui/input";
 import { Separator } from "../components/ui/separator";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { NavLink } from "react-router-dom";
-import { signupDataType } from "../schema/user";
+import { signupDataType, userSignupSchema } from "../schema-zod/user";
 
 type loadingState = boolean;
 type passwordVisibility = boolean;
 
 const Signup = () => {
+
+
+
+
+
+
+
+
+
+  const [formError, setFormError] = useState<Partial<signupDataType>>({});
+
   const [loading] = useState<loadingState>(false);
 
   const [hidePassword, setHidePassword] = useState<passwordVisibility>(true);
 
-  const [loginInputData, setLoginInputData] = useState<signupDataType>({
+  const [signupInputData, setSignupInputData] = useState<signupDataType>({
     email: "",
     password: "",
     fullname: "",
@@ -31,12 +42,24 @@ const Signup = () => {
 
   const inputChangeHandle = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setLoginInputData({ ...loginInputData, [name]: value });
+    setSignupInputData({ ...signupInputData, [name]: value });
   };
 
   const formSubmitHandle = (e: FormEvent) => {
     e.preventDefault();
-    console.log(loginInputData);
+
+    // Form validation using zod
+
+    const validateForm = userSignupSchema.safeParse(signupInputData);
+
+    if (validateForm.error) {
+      const catchErr = validateForm.error.formErrors.fieldErrors;
+      setFormError(catchErr as Partial<signupDataType>);
+      return false;
+    }
+
+    // Signup Api implementation 
+
   };
 
   return (
@@ -47,57 +70,66 @@ const Signup = () => {
         {/* Form  */}
         <form
           onSubmit={formSubmitHandle}
-          className="md:border lg:border md:w-2/3 lg:w-1/3 w-full  p-5 rounded-md"
+          className="md:border transition-all duration-1000 lg:border md:w-2/3 lg:w-1/3 w-full  p-5 rounded-md"
         >
-          {/* Username  */}
-          <label className="">Enter Fullname</label>
+          {/* Fullname  */}
+          <label className="">Enter Fullname *</label>
           <div className="mb-4 relative">
             <Input
               name="fullname"
-              value={loginInputData.fullname}
-              className="pl-10 text-lg focus-visible:ring-0"
+              value={signupInputData.fullname}
+              className={`pl-10 text-lg focus-visible:ring-0 `}
               type="text"
               placeholder="Fullname"
               onChange={inputChangeHandle}
             />
             <User className="absolute inset-y-2 left-2 text-gray-500 w-5 h-5 pointer-events-none" />
+            {formError && (
+              <p className="text-red-500 text-xs">{formError.fullname}</p>
+            )}
           </div>
 
           {/* Email  */}
-          <label className="">Enter email</label>
+          <label className="">Enter email *</label>
           <div className="mb-4 relative">
             <Input
               name="email"
-              value={loginInputData.email}
-              className="pl-10 text-lg focus-visible:ring-0"
+              value={signupInputData.email}
+              className={`pl-10 text-lg focus-visible:ring-0 `}
               type="text"
               placeholder="Email"
               onChange={inputChangeHandle}
             />
             <Mail className="absolute inset-y-2 left-2 text-gray-500 w-5 h-5 pointer-events-none" />
+            {formError && (
+              <p className="text-red-500 text-xs">{formError.email}</p>
+            )}
           </div>
 
           {/* Number  */}
-          <label className="">Enter contact no.</label>
+          <label className="">Enter contact no *</label>
           <div className="mb-4 relative">
             <Input
               name="contact"
-              value={loginInputData.contact}
-              className="pl-10 text-lg focus-visible:ring-0"
+              value={signupInputData.contact}
+              className={`pl-10 text-lg focus-visible:ring-0 `}
               type="text"
               placeholder="Contact number"
               onChange={inputChangeHandle}
             />
             <Contact2Icon className="absolute inset-y-2 left-2 text-gray-500 w-5 h-5 pointer-events-none" />
+            {formError && (
+              <p className="text-red-500 text-xs">{formError.contact}</p>
+            )}
           </div>
 
           {/* Password  */}
-          <label className="">Enter passowrd</label>
+          <label className="">Enter passowrd *</label>
           <div className="mb-4 relative">
             <Input
               name="password"
-              value={loginInputData.password}
-              className="pl-10 text-lg focus-visible:ring-0"
+              value={signupInputData.password}
+              className={`pl-10 text-lg focus-visible:ring-0 `}
               type={`${hidePassword ? "password" : "text"}`}
               placeholder="Password"
               onChange={inputChangeHandle}
@@ -116,6 +148,9 @@ const Signup = () => {
               />
             )}
             <LockKeyhole className="absolute inset-y-2 left-2 text-gray-500 w-5 h-5 pointer-events-none" />
+            {formError.password && (
+              <p className="text-red-500 text-xs">{formError.password}</p>
+            )}
           </div>
           <div className="transition-all duration-1000">
             {loading ? (
