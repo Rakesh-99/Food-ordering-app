@@ -10,7 +10,7 @@ const Login = lazy(() => import("./auth/Login"));
 const ForgetPassword = lazy(() => import("./auth/ForgetPassword"));
 const ResetPassword = lazy(() => import("./auth/ResetPassword"));
 const VerifyOTP = lazy(() => import("./auth/VerifyOTP"));
-
+const Profile = lazy(() => import('./pages/Profile'));
 
 const router = createBrowserRouter([
   {
@@ -69,10 +69,19 @@ const router = createBrowserRouter([
             <VerifyOTP />
           </Suspense>
         )
+      },
+      {
+        path: 'profile',
+        element: (
+          <Suspense fallback={<div>Loading..</div>}>
+            <Profile />
+          </Suspense>
+        )
       }
     ],
   },
 ]);
+
 
 const App = () => {
   return (
