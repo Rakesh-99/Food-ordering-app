@@ -8,9 +8,17 @@ import { Button } from '../components/ui/button';
 const Home = () => {
   return (
     <>
-      <div className="flex w-[90%] m-auto mt-10 md:mt-0 lg:mt-0 justify-around items-center flex-col md:flex-row lg:flex-row flex-wrap  ">
+      <div className="flex w-[90%]  m-auto mt-10 md:mt-0 lg:mt-0 justify-around items-center flex-col md:flex-row lg:flex-row flex-wrap  ">
         {/* Left content */}
-        <div className="md:w-1/3 lg:w-1/3 w-full  ">
+        <div className="md:w-1/3 lg:w-1/3 w-full relative ">
+
+
+
+          <span className='bg-zinc-50 absolute -z-10 -top-32 rounded-full h-[200px] w-[200px]'></span>
+          <span className='bg-zinc-100 absolute -z-10  -right-20 rounded-full h-[400px] w-[400px]'></span>
+
+
+
           <h1 className='text-3xl font-extrabold font-sans'>Order food anytime & <br /> anywhere</h1>
           <p>Hey, our delicious food is waiting for you, we are always ner to you</p>
 
