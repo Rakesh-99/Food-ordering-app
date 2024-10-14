@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom"
 import { Button } from "./ui/button";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Sheet, SheetClose, SheetContent, SheetFooter, SheetHeader, SheetTrigger } from "./ui/sheet";
-import { IoMoon, IoSunny, IoHomeOutline, IoCart } from "react-icons/io5";
+import { IoHomeOutline, IoCart } from "react-icons/io5";
 import { FaCircleUser } from "react-icons/fa6";
 import { BiMenu } from "react-icons/bi";
 import { MdOutlineWbSunny } from "react-icons/md";
@@ -12,6 +12,7 @@ import { ImProfile } from "react-icons/im";
 import { RxUpdate } from "react-icons/rx";
 import { IconType } from "react-icons";
 import { RiRestaurantFill } from "react-icons/ri";
+import { Moon, Sun } from "lucide-react";
 
 
 
@@ -31,6 +32,7 @@ interface NavLinks {
 
 const Header = () => {
 
+  const [theme, setTheme] = useState("");
 
   const navlinks: NavLinks[] = [
 
@@ -129,25 +131,23 @@ const Header = () => {
 
           <div className="flex items-center gap-6 ">
             {/* Theme drop down menu  */}
-            <div className="">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon">
-                    <IoMoon className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                    <IoSunny className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                    <span className="sr-only">Toggle theme</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => setTheme("light")}>
-                    Light
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setTheme("dark")}>
-                    Dark
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                  <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                  <span className="sr-only">Toggle theme</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setTheme("light")}>
+                  Light
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTheme("dark")}>
+                  Dark
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {/* Cart  */}
             <div className="relative">
@@ -224,13 +224,15 @@ export const SmallerScreenHeader = () => {
     <>
       <div className="py-2 w-full shadow-sm">
         <Sheet>
-          <div className="flex justify-end px-3 mt-2">
-            <SheetTrigger asChild className="">
+          <SheetTrigger asChild className="">
+            <div className="flex items-center justify-between mx-5 py-2">
+              <h1 className="text-xl font-extrabold ">Food Frenzy</h1>
               <Button variant="outline" className="">
                 <BiMenu size={23} />
               </Button>
-            </SheetTrigger>
-          </div>
+            </div>
+          </SheetTrigger>
+
 
 
           <SheetContent className="flex flex-col justify-around">
@@ -280,8 +282,8 @@ export const SmallerScreenHeader = () => {
             </SheetFooter>
 
           </SheetContent>
-        </Sheet>
-      </div>
+        </Sheet >
+      </div >
     </>
   )
 };
