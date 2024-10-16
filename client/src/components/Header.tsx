@@ -13,7 +13,7 @@ import { RxUpdate } from "react-icons/rx";
 import { IconType } from "react-icons";
 import { RiRestaurantFill } from "react-icons/ri";
 import { Moon, Sun } from "lucide-react";
-
+import { Link } from "react-router-dom";
 
 
 
@@ -69,7 +69,7 @@ const Header = () => {
 
         {/* App title  */}
         <div className="">
-          <h1 className="md:text-2xl lg:text-2xl sm:text-lg text-sm font-extrabold">Food Frenzy</h1>
+          <Link to={'/'} className="md:text-2xl lg:text-2xl sm:text-lg text-sm font-extrabold">Food Frenzy</Link>
         </div>
 
 
@@ -226,7 +226,7 @@ export const SmallerScreenHeader = () => {
         <Sheet>
           <SheetTrigger asChild className="">
             <div className="flex items-center justify-between mx-5 py-2">
-              <h1 className="text-xl font-extrabold ">Food Frenzy</h1>
+              <Link to={'/'} className="text-xl font-extrabold ">Food Frenzy</Link>
               <Button variant="outline" className="">
                 <BiMenu size={23} />
               </Button>
@@ -239,7 +239,7 @@ export const SmallerScreenHeader = () => {
             {/* Header  */}
             <SheetHeader className="border-b-2">
               <div className="flex items-center justify-between my-10">
-                <h1 className="text-xl font-extrabold">Food Frenzy</h1>
+                <Link to={'/'} className="text-xl font-extrabold">Food Frenzy</Link>
 
                 {/* theme toggle  */}
                 <DropdownMenu>
