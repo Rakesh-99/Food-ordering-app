@@ -1,11 +1,33 @@
 import PizzaImage from '../assets/pizza.png';
 import { IoSearchOutline } from "react-icons/io5";
 import { Button } from '../components/ui/button';
-
-
+import { ChangeEvent, FormEvent, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 
 const Home = () => {
+
+
+  const [searchData, setSearchData] = useState('');
+  const naviagte = useNavigate();
+
+
+
+  const submitHandle = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    naviagte(`/search/${searchData}`);
+  }
+
+  const inputChangeHandle = (e: ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    setSearchData(value)
+  }
+
+
+
+
+
+
   return (
     <>
       <div className="flex w-[90%]  m-auto mt-10 md:mt-0 lg:mt-0 justify-around items-center flex-col md:flex-row lg:flex-row flex-wrap  ">
@@ -15,7 +37,7 @@ const Home = () => {
 
 
           <span className='bg-zinc-50 absolute -z-10 -top-32 rounded-full h-[200px] w-[200px]'></span>
-          <span className='bg-zinc-100 absolute -z-10  -right-20 rounded-full h-[400px] w-[400px]'></span>
+          <span className='bg-zinc-50 absolute -z-10  -right-20 rounded-full h-[400px] w-[400px]'></span>
 
 
 
@@ -28,11 +50,23 @@ const Home = () => {
               <h1 className='text-xl font-[500] '>Discover the best food & drinks</h1>
             </div>
 
-            <div className="flex relative mt-5">
-              <input type="text" placeholder='Search food' className='pl-10 mr-2 w-full  outline-none border py-2 ' />
+
+
+            <form action="" className='flex relative mt-5' onSubmit={submitHandle} >
+              <input
+                type="text"
+                required
+                placeholder='Search Restaurant by Food, City & Country'
+                className='pl-10 mr-2 w-full  outline-none border py-2 '
+                onChange={inputChangeHandle}
+                name='search'
+              />
+
               <IoSearchOutline size={23} color='gray' className='absolute left-0 top-2 ml-2' />
-              <Button>Search</Button>
-            </div>
+
+              <Button className='bg-blue-500' type='submit'>Search</Button>
+            </form>
+
 
           </div>
         </div>
