@@ -11,6 +11,10 @@ const ForgetPassword = lazy(() => import("./auth/ForgetPassword"));
 const ResetPassword = lazy(() => import("./auth/ResetPassword"));
 const VerifyOTP = lazy(() => import("./auth/VerifyOTP"));
 const Profile = lazy(() => import('./pages/Profile'));
+const Search = lazy(() => import('./components/Search'));
+const ViewRestaurantDetails = lazy(() => import('./components/ViewRestaurantDetails'));
+const Cart = lazy(() => import('./components/Cart'));
+const Checkout = lazy(() => import('./components/Checkout'));
 
 const router = createBrowserRouter([
   {
@@ -76,6 +80,38 @@ const router = createBrowserRouter([
           <Suspense fallback={<div>Loading..</div>}>
             <Profile />
           </Suspense>
+        )
+      },
+      {
+        path: 'search/:id',
+        element: (
+          <Suspense fallback={<div>Loading..</div>}>
+            <Search />
+          </Suspense>
+        )
+      },
+      {
+        path: 'view-restaurant-details/:id',
+        element: (
+          <Suspense>
+            <ViewRestaurantDetails />
+          </Suspense>
+        )
+      },
+      {
+        path: 'cart',
+        element: (
+          <Suspense fallback={<div>Loading..</div>}>
+            <Cart />
+          </Suspense>
+        )
+      },
+      {
+        path: "Checkout",
+        element: (
+          <Suspense fallback={<div>Loading..</div>}>
+            <Checkout />
+          </Suspense >
         )
       }
     ],
