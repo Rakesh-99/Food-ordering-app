@@ -10,31 +10,21 @@ import { MdOutlineWbSunny } from "react-icons/md";
 import { LuSunMoon } from "react-icons/lu";
 import { ImProfile } from "react-icons/im";
 import { RxUpdate } from "react-icons/rx";
-import { IconType } from "react-icons";
+
 import { RiRestaurantFill } from "react-icons/ri";
 import { Moon, Sun } from "lucide-react";
 import { Link } from "react-router-dom";
+import { NavLinksTypes } from "../constants/dataTypes";
 
 
 
 
-
-type DropDown = {
-  showStatusBar: boolean,
-  showActivityBar: boolean,
-  showPanel: boolean
-}
-interface NavLinks {
-  path: string,
-  label: string,
-  icon: IconType
-}
 
 const Header = () => {
 
   const [theme, setTheme] = useState("");
 
-  const navlinks: NavLinks[] = [
+  const navlinks: NavLinksTypes[] = [
 
     {
       path: '/',
@@ -55,11 +45,11 @@ const Header = () => {
 
 
 
-  const [dropDown, setDropDown] = useState<DropDown>({
-    showStatusBar: true,
-    showActivityBar: false,
-    showPanel: false
-  });
+  // const [dropDown, setDropDown] = useState<DropDownTypes>({
+  //   showStatusBar: true,
+  //   showActivityBar: false,
+  //   showPanel: false
+  // });
 
   const admin = true;
 
@@ -80,7 +70,7 @@ const Header = () => {
 
             {/* Nvalinks  */}
             {
-              navlinks.map((val: NavLinks, idx: number): JSX.Element => {
+              navlinks.map((val: NavLinksTypes, idx: number): JSX.Element => {
 
                 return (
                   <div className="" key={idx}>
@@ -110,17 +100,17 @@ const Header = () => {
                     <DropdownMenuCheckboxItem
 
                     >
-                      Restaurant
+                      <Link to={'/admin/restaurant'}>Restaurant</Link>
                     </DropdownMenuCheckboxItem>
                     <DropdownMenuCheckboxItem
 
                     >
-                      Menu
+                      <Link to={'/admin/available-menu'}>Menu</Link>
                     </DropdownMenuCheckboxItem>
                     <DropdownMenuCheckboxItem
 
                     >
-                      Order
+                      <Link to={'/admin/restaurant-order'}>Order</Link>
                     </DropdownMenuCheckboxItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -185,7 +175,7 @@ export default Header;
 export const SmallerScreenHeader = () => {
 
 
-  const navlinks: NavLinks[] = [
+  const navlinks: NavLinksTypes[] = [
 
     {
       path: '/profile',
@@ -203,7 +193,7 @@ export const SmallerScreenHeader = () => {
       icon: IoCart
     },
     {
-      path: '/menu',
+      path: '/admin/available-menu',
       label: 'Menu',
       icon: BiMenu
     },
@@ -264,7 +254,7 @@ export const SmallerScreenHeader = () => {
 
             <div className="flex flex-col gap-1 ">
               {
-                navlinks.map((val: NavLinks, idx: number): JSX.Element => {
+                navlinks.map((val: NavLinksTypes, idx: number): JSX.Element => {
                   return (
                     <SheetClose asChild className="flex my-3 gap-3" key={idx}>
                       <Link className="text-xl" to={val.path}>
