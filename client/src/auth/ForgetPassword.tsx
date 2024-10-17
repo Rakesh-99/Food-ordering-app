@@ -4,7 +4,7 @@ import { Input } from "../components/ui/input";
 import { Separator } from "../components/ui/separator";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { NavLink } from "react-router-dom";
-import { isEmailValidType, forgetPasswordSchema } from '../schema-zod/user';
+import { isEmailValidType, forgetPasswordSchema } from '../zod/schema-user/user';
 
 
 

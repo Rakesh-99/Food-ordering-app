@@ -12,7 +12,7 @@ import { Input } from "../components/ui/input";
 import { Separator } from "../components/ui/separator";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { NavLink } from "react-router-dom";
-import { signupDataType, userSignupSchema } from "../schema-zod/user";
+import { signupDataType, userSignupSchema } from "../zod/schema-user/user";
 
 type loadingState = boolean;
 type passwordVisibility = boolean;
