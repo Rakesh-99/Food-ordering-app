@@ -4,6 +4,7 @@ import Layout from "./components/layout/Layout";
 
 
 
+
 const Home = lazy(() => import("./pages/Home"));
 const Signup = lazy(() => import("./auth/Signup"));
 const Login = lazy(() => import("./auth/Login"));
@@ -14,7 +15,11 @@ const Profile = lazy(() => import('./pages/Profile'));
 const Search = lazy(() => import('./components/Search'));
 const ViewRestaurantDetails = lazy(() => import('./components/ViewRestaurantDetails'));
 const Cart = lazy(() => import('./components/Cart'));
-const Checkout = lazy(() => import('./components/Checkout'));
+const CheckoutPopupModal = lazy(() => import('./components/CheckoutPopupModal'));
+
+// Admin pages :
+const Restaurant = lazy(() => import('./pages/admin/Restaurant'));
+const AvailableMenus = lazy(() => import('./pages/admin/AvailableMenus'));
 
 const router = createBrowserRouter([
   {
@@ -107,11 +112,29 @@ const router = createBrowserRouter([
         )
       },
       {
-        path: "Checkout",
+        path: "checkout-popup-modal",
         element: (
           <Suspense fallback={<div>Loading..</div>}>
-            <Checkout />
+            <CheckoutPopupModal />
           </Suspense >
+        )
+      },
+
+      // Admin routes 
+      {
+        path: 'admin/restaurant',
+        element: (
+          <Suspense fallback={<div>Loading..</div>}>
+            <Restaurant />
+          </Suspense>
+        )
+      },
+      {
+        path: 'admin/available-menu',
+        element: (
+          <Suspense fallback={<div>Loading...</div>}>
+            <AvailableMenus />
+          </Suspense>
         )
       }
     ],
