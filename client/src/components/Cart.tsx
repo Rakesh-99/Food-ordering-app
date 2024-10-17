@@ -1,6 +1,6 @@
 
 import { RxAvatar } from "react-icons/rx";
-import { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "./ui/table";
+import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "./ui/table";
 import { FaPlus } from "react-icons/fa6";
 import { GrSubtract } from "react-icons/gr";
 import { Button } from "./ui/button";
