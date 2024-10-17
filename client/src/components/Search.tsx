@@ -39,11 +39,11 @@ const Search = () => {
 
                 <div className="w-full mt-5">
                     {/* form  */}
-                    <form action="" className='flex mt-5 md:mt-0 lg:mt-0 sm:mt-5 border md:w-full lg:w-full sm:w-11/12 w-11/12 m-auto  gap-1 relative' onSubmit={submitHandle}>
+                    <form action="" className='flex mt-5 md:mt-0 lg:mt-0 sm:mt-5  md:w-full lg:w-full sm:w-11/12 w-11/12 m-auto  gap-1 relative' onSubmit={submitHandle}>
                         <input
                             type="text"
                             placeholder='Search restaurant and cuisines'
-                            className='w-full border rounded-sm pl-10 outline-none'
+                            className='w-11/12 border rounded-sm pl-10 outline-none'
                             name='search'
                             onChange={inputChnageHandle}
                             required
