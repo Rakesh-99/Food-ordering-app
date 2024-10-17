@@ -32,7 +32,7 @@ const FoodCardMenu = () => {
                 {/* Card content  */}
                 <div className="border shadow-sm py-2 rounded-sm hover:scale-[99%] transition-all duration-200 flex-col gap-2 px-2  flex relative justify-center">
 
-                    <img src={pizzaImg} alt="" className='h-48  w-full rounded-md object-cover ' />
+                    <img src={pizzaImg} alt="" className='h-40  w-full rounded-md object-cover ' />
                     <p className='bg-zinc-50 opacity-75 left-1 rounded-sm px-2 top-1  absolute'>Featured</p>
 
                     <h1 className='text-xl font-bold'>
