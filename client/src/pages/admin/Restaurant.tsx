@@ -23,12 +23,14 @@ const Restaurant = () => {
 
 
     const inputChangeHandle = (e: ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
+        const { name, value, type } = e.target;
         setRestaurantInfo({
             ...restaurantInfo,
-            [name]: value
+            [name]: type === 'number' ? Number(value) : value
         })
     }
+
+
 
     const fileChangeHandle = (e: ChangeEvent<HTMLInputElement>) => {
         const rawFile = e.target.files?.[0];
@@ -140,7 +142,7 @@ const Restaurant = () => {
                         placeholder="Enter delivery time"
                         className="py-1 px-2 w-full outline-none border-b-2"
                         value={restaurantInfo.delivery_time}
-                        onChange={(e) => setRestaurantInfo({ ...restaurantInfo, delivery_time: Number(e.target.value) })}
+                        onChange={inputChangeHandle}
                     />
                     {
                         formError &&
@@ -195,9 +197,8 @@ const Restaurant = () => {
                         accept="image/*"
                     />
                     {
-                        formError && typeof formError.restaurant_image === 'string' && ( // Check if it's a string
-                            <p className="text-red-500 text-sm">{formError.restaurant_image}</p>
-                        )
+                        formError &&
+                        <p>{formError.restaurant_image?.name || "Image is required!"}</p>
                     }
                 </div>
                 <Button type="submit" className="bg-blue-500 hover:bg-blue-600 w-full mt-5">Add Restaurant</Button>
