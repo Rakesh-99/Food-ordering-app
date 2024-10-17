@@ -6,7 +6,7 @@ import { GrSubtract } from "react-icons/gr";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { FaLongArrowAltRight } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import CheckoutPopupModal from "./CheckoutPopupModal";
 
 
 
@@ -14,10 +14,9 @@ import { Link } from "react-router-dom";
 const Cart = () => {
 
   const [foodPrice] = useState(120);
-
   const [quantity, setQuantity] = useState(1);
-
   const [totalPrice, setTotalPrice] = useState(foodPrice);
+  const [open, setOpen] = useState(false);
 
 
   const addition = () => {
@@ -48,7 +47,6 @@ const Cart = () => {
   return (
     <div className="w-[90%] m-auto mt-10 select-none">
       <Table>
-        <TableCaption>A list of your recent invoices.</TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead>Item</TableHead>
@@ -95,19 +93,31 @@ const Cart = () => {
               </div>
             </TableCell>
             <TableCell>{totalPrice}</TableCell>
-            <TableCell className="text-right"><Button className="bg-blue-500">Remove</Button></TableCell>
+            <TableCell className="text-right"><Button className="bg-red-500 hover:bg-red-700">Remove</Button></TableCell>
           </TableRow>
         </TableFooter>
       </Table>
 
+      {/* Total ammount summery  */}
+
+      <div className="mt-5 flex w-full gap-3 justify-end">
+        <h2 className="text-xl font-extrabold">Total amount to be paid :</h2>
+        <h1 className="font-extrabold text-xl text-blue-500"> ₹ {totalPrice}</h1>
+      </div>
+
       {/* Checkout button  */}
-      <Link to={'/checkout'} className="flex justify-end mt-5">
-        <Button type="button" className="flex gap-4">
+
+      <div className="flex w-full justify-end">
+        <Button type="button" className="flex gap-4 bg-blue-500 hover:bg-blue-600 mt-5" onClick={() => setOpen(true)}>
           <p>Proceed to checkout</p>
           <FaLongArrowAltRight size={20} />
         </Button>
-      </Link>
+      </div>
 
+
+
+      {/* Checkout modal popup  */}
+      <CheckoutPopupModal open={open} setOpen={setOpen} />
     </div>
   )
 }
