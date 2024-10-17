@@ -208,13 +208,13 @@ export const SmallerScreenHeader = () => {
       icon: BiMenu
     },
     {
-      path: 'restaurant',
+      path: '/restaurant',
       label: 'Restaurant',
       icon: RiRestaurantFill
 
     },
     {
-      path: 'restaurant-orders',
+      path: '/restaurant-orders',
       label: 'Restaurant Orders',
       icon: RxUpdate
     }
@@ -235,7 +235,7 @@ export const SmallerScreenHeader = () => {
 
 
 
-          <SheetContent className="flex flex-col justify-around">
+          <SheetContent className="flex flex-col gap-10">
             {/* Header  */}
             <SheetHeader className="border-b-2">
               <div className="flex items-center justify-between my-10">
@@ -266,9 +266,12 @@ export const SmallerScreenHeader = () => {
               {
                 navlinks.map((val: NavLinks, idx: number): JSX.Element => {
                   return (
-                    <div className="flex flex-col my-2" key={idx}>
-                      <NavLink className="font-[400] flex  gap-2" to={val.path}> <span><val.icon size={20} /> </span> <p>{val.label}</p></NavLink>
-                    </div>
+                    <SheetClose asChild className="flex my-3 gap-3" key={idx}>
+                      <Link className="text-xl" to={val.path}>
+                        <val.icon size={22} />
+                        <p>{val.label}</p>
+                      </Link>
+                    </SheetClose>
                   )
                 })
               }
