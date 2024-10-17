@@ -208,7 +208,7 @@ export const SmallerScreenHeader = () => {
       icon: BiMenu
     },
     {
-      path: '/restaurant',
+      path: '/admin/restaurant',
       label: 'Restaurant',
       icon: RiRestaurantFill
 
