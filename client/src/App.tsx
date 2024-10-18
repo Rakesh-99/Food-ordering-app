@@ -16,10 +16,11 @@ const Search = lazy(() => import('./components/Search'));
 const ViewRestaurantDetails = lazy(() => import('./components/ViewRestaurantDetails'));
 const Cart = lazy(() => import('./components/Cart'));
 const CheckoutPopupModal = lazy(() => import('./components/CheckoutPopupModal'));
-
 // Admin pages :
 const Restaurant = lazy(() => import('./pages/admin/Restaurant'));
 const AvailableMenus = lazy(() => import('./pages/admin/AvailableMenus'));
+const Order = lazy(() => import('./pages/admin/Order'));
+
 
 const router = createBrowserRouter([
   {
@@ -134,6 +135,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<div>Loading...</div>}>
             <AvailableMenus />
+          </Suspense>
+        )
+      },
+      {
+        path: 'admin/order',
+        element: (
+          <Suspense fallback={<div>Loading..</div>}>
+            <Order />
           </Suspense>
         )
       }
