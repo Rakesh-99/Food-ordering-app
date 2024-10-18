@@ -16,3 +16,10 @@ export type DropDownTypes = {
     showActivityBar: boolean,
     showPanel: boolean
 }
+
+export type MenuDetailTypes = {
+    menu_name: string,
+    menu_price: number,
+    imageFile: string,
+    menu_description: string
+}
