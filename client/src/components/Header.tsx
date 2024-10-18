@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { NavLink } from "react-router-dom"
 import { Button } from "./ui/button";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
@@ -22,7 +21,7 @@ import { NavLinksTypes } from "../constants/dataTypes";
 
 const Header = () => {
 
-  const [theme, setTheme] = useState("");
+  // const [theme, setTheme] = useState("");
 
   const navlinks: NavLinksTypes[] = [
 
@@ -110,7 +109,7 @@ const Header = () => {
                     <DropdownMenuCheckboxItem
 
                     >
-                      <Link to={'/admin/restaurant-order'}>Order</Link>
+                      <Link to={'/admin/order'}>Order</Link>
                     </DropdownMenuCheckboxItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -130,10 +129,10 @@ const Header = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setTheme("light")}>
+                <DropdownMenuItem >
                   Light
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme("dark")}>
+                <DropdownMenuItem >
                   Dark
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -141,7 +140,7 @@ const Header = () => {
 
             {/* Cart  */}
             <div className="relative">
-              <IoCart size={22} />
+              <Link to={'/cart'}><IoCart size={22} /></Link>
               <span className="absolute -top-4 -right-2 bg-red-500 text-white rounded-full text-center w-5 font-semibold text-sm">
                 {1}
               </span>
@@ -183,7 +182,7 @@ export const SmallerScreenHeader = () => {
       icon: IoHomeOutline
     },
     {
-      path: '/order',
+      path: '/admin/order',
       label: 'Order',
       icon: RxUpdate
     },
@@ -241,10 +240,10 @@ export const SmallerScreenHeader = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => setTheme("light")}>
+                    <DropdownMenuItem >
                       Light
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setTheme("dark")}>
+                    <DropdownMenuItem >
                       Dark
                     </DropdownMenuItem>
                   </DropdownMenuContent>
