@@ -4,6 +4,7 @@ import { Input } from "../../components/ui/input";
 import { Button } from "../../components/ui/button";
 import { ChangeEvent, Dispatch, FormEvent, SetStateAction, useState } from "react";
 import { RestaurantMenuTypes, restaurantMenuSchema } from '../../zod/schema-restaurantMenu/restaurant-menu';
+import { Loader } from "lucide-react";
 
 const PopupModalMenu = ({ openMenu, setOpenMenu }: { openMenu: boolean, setOpenMenu: Dispatch<SetStateAction<boolean>> }) => {
 
@@ -17,7 +18,7 @@ const PopupModalMenu = ({ openMenu, setOpenMenu }: { openMenu: boolean, setOpenM
         menu_imageFile: ''
     })
     const [formError, setFormError] = useState<Partial<RestaurantMenuTypes>>();
-
+    const loading = false;
 
 
     const formSubmitHandle = (e: FormEvent<HTMLFormElement>) => {
@@ -174,13 +175,20 @@ const PopupModalMenu = ({ openMenu, setOpenMenu }: { openMenu: boolean, setOpenM
                             </div>
 
                             <DialogFooter>
-                                <Button className="bg-blue-500 hover:bg-blue-600" type="submit">Save changes</Button>
+                                {
+                                    loading ?
+                                        <Button disabled className="bg-blue-500 flex gap-2 items-center w-full hover:bg-blue-600" type="submit">
+                                            <Loader className="animate-spin" />
+                                            <p>Loading..</p>
+                                        </Button>
+                                        :
+                                        <Button className="bg-blue-500 w-full hover:bg-blue-600" type="submit">Add menu</Button>
+                                }
                             </DialogFooter>
                         </form>
                     </DialogContent>
                 </Dialog>
             }
-
         </>
     )
 }
