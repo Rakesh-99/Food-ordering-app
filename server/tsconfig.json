@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES2020", // Target modern JS features
+    "module": "commonjs", // For Node.js, commonjs is typical
+    "strict": true, // Enables strict type-checking
+    "esModuleInterop": true, // Allows default imports from CommonJS modules
+    "skipLibCheck": true, // Skips type checking of declaration files
+    "forceConsistentCasingInFileNames": true, // Enforce case-sensitive imports
+    "outDir": "./dist", // Transpiled output directory
+    "moduleResolution": "node", // Resolve modules like Node.js
+    "resolveJsonModule": true // Allows import of .json files
+  },
+  "include": ["./**/*.ts"], // Include all TypeScript files in the project
+  "exclude": ["node_modules"] // Exclude node_modules from compilation
+}
