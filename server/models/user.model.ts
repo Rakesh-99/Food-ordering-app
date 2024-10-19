@@ -8,7 +8,7 @@ import mongoose from "mongoose";
 // Schema types for TypeScript : 
 
 
-export interface IuserSchemaTypes extends Document {
+export interface IUserSchemaTypes extends Document {
     fullname: string,
     email: string,
     contact: number,
@@ -30,7 +30,7 @@ export interface IuserSchemaTypes extends Document {
 
 // User Schema : 
 
-const userSchema = new mongoose.Schema<IuserSchemaTypes>({
+const userSchema = new mongoose.Schema<IUserSchemaTypes>({
     fullname: {
         type: String,
         required: [true, 'User name can not be empty!']
