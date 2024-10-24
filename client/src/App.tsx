@@ -10,7 +10,7 @@ const Signup = lazy(() => import("./auth/Signup"));
 const Login = lazy(() => import("./auth/Login"));
 const ForgetPassword = lazy(() => import("./auth/ForgetPassword"));
 const ResetPassword = lazy(() => import("./auth/ResetPassword"));
-const VerifyOTP = lazy(() => import("./auth/VerifyOTP"));
+const VerifyEmail = lazy(() => import("./auth/VerifyEmail"));
 const Profile = lazy(() => import('./pages/Profile'));
 const Search = lazy(() => import('./components/Search'));
 const ViewRestaurantDetails = lazy(() => import('./components/ViewRestaurantDetails'));
@@ -73,10 +73,10 @@ const router = createBrowserRouter([
         )
       },
       {
-        path: "verify-otp",
+        path: "verify-email",
         element: (
           <Suspense fallback={<div>Loading..</div>}>
-            <VerifyOTP />
+            <VerifyEmail />
           </Suspense>
         )
       },
