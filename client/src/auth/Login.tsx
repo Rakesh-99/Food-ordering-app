@@ -4,7 +4,7 @@ import { Input } from "../components/ui/input";
 import { Separator } from "../components/ui/separator";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { loginDataType, userLoginSchema } from "../schema-zod/user";
+import { loginDataType, userLoginSchema } from "../zod/schema-user/user";
 
 
 
