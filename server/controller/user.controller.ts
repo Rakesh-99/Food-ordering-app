@@ -3,47 +3,45 @@ import userModel from "../models/user.model";
 import bcrypt, { genSalt } from 'bcrypt';
 import jsonwebtoken from 'jsonwebtoken';
 import { ErrorHandler } from "../utils/ErrorHandler";
+import asyncErrorHandler from 'express-async-handler';
+
+
 
 // User Signup : 
 
-export const userSignup = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
-
+export const userSignup = asyncErrorHandler(async (req: Request, res: Response, next: NextFunction): Promise<any> => {
     const { fullname, email, password, contact }: { fullname: string, email: string, password: string, contact: number } = req.body;
 
-    try {
-        // If user is already exist 
-        const user = await userModel.findOne({ email });
 
-        if (user) {
-            return next(new ErrorHandler(401, "User already exist!"));
-        }
+    // If user is already exist 
+    const user = await userModel.findOne({ email });
 
-        // Password hashing 
-        const gensalt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, gensalt);
-
-
-        // Register user ;
-        const registerUser = new userModel({
-            fullname,
-            email,
-            contact,
-            password: hashedPassword
-        })
-        await registerUser.save();
-
-        const userWithoutPassword = await userModel.findOne({ email }).select("-password");
-        return res.status(200).json({ sucess: true, message: "User has been registered", user: userWithoutPassword })
-
-    } catch (error) {
-        return next(new ErrorHandler(500, `Internal Server Errro! : ${error}`));
+    if (user) {
+        return next(new ErrorHandler(401, "User already exist!"));
     }
-};
+
+    // Password hashing 
+    const gensalt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, gensalt);
+
+
+    // Register user ;
+    const registerUser = new userModel({
+        fullname,
+        email,
+        contact,
+        password: hashedPassword
+    })
+    await registerUser.save();
+
+    const userWithoutPassword = await userModel.findOne({ email }).select("-password");
+    return res.status(200).json({ sucess: true, message: "User has been registered", user: userWithoutPassword })
+});
 
 
 // User login : 
 
-export const userLogin = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+export const userLogin = asyncErrorHandler(async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 
     const { email, password }: { email: string, password: string } = req.body;
 
@@ -72,13 +70,13 @@ export const userLogin = async (req: Request, res: Response, next: NextFunction)
     } catch (error) {
         return next(new ErrorHandler(500, `Internal server error! ${error}`));
     }
-};
+});
 
 
 
 // Verify email : 
 
-export const verifyEmail = async (req: Request, res: Response) => {
+export const verifyEmail = asyncErrorHandler(async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 
     const { otp } = req.body;
 
@@ -90,4 +88,4 @@ export const verifyEmail = async (req: Request, res: Response) => {
         return res.status(401).json({ success: false, message: "User is not found!" });
     }
 
-}
+})
