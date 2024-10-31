@@ -1,75 +1,87 @@
 import { NextFunction, Request, Response } from "express";
 import userModel from "../models/user.model";
-import bcrypt, { genSalt } from 'bcrypt';
-import jsonwebtoken from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 import { ErrorHandler } from "../utils/ErrorHandler";
 import asyncErrorHandler from 'express-async-handler';
-
-
+import createJwtTokenAndCookies from "../utils/jwtTokenAndCookies";
+import { sendVerificationMail } from "../config/sendEmails";
 
 // User Signup : 
 
 export const userSignup = asyncErrorHandler(async (req: Request, res: Response, next: NextFunction): Promise<any> => {
-    const { fullname, email, password, contact }: { fullname: string, email: string, password: string, contact: number } = req.body;
+    const { fullname, email, password, contact }: { fullname: string, email: string, password: string, contact: string } = req.body;
 
 
-    // If user is already exist 
-    const user = await userModel.findOne({ email });
+    // Check if the user is already exist in db : 
 
-    if (user) {
-        return next(new ErrorHandler(401, "User already exist!"));
+    const isUserExist = await userModel.findOne({ email });
+    if (isUserExist) {
+        return next(new ErrorHandler(400, "User is already exist!"));
     }
 
-    // Password hashing 
-    const gensalt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, gensalt);
+    // Hash the plain password coming from req body: 
+    const hashedPassword = await bcrypt.hash(password, 10);
 
+    // create a verification token : 
 
-    // Register user ;
-    const registerUser = new userModel({
+    const verificationToken = Math.floor(100000 + Math.random() * 200000).toString();
+
+    // create a new user : 
+
+    const newUser = new userModel({
         fullname,
         email,
         contact,
-        password: hashedPassword
+        password: hashedPassword,
+        verificationToken,
+        verificationTokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000  // 24 hours\
     })
-    await registerUser.save();
+    await newUser.save();
 
-    const userWithoutPassword = await userModel.findOne({ email }).select("-password");
-    return res.status(200).json({ sucess: true, message: "User has been registered", user: userWithoutPassword })
-});
+    // send the new user data in response without password : 
+    // convert the mongoose document in plain object : 
+    const { password: _, ...rest } = newUser.toObject();
 
+
+    // Send verification mail : 
+    await sendVerificationMail(newUser.email, verificationToken);
+
+    return res.status(200).json({ success: true, message: 'User has been registered', user: rest });
+})
 
 // User login : 
 
 export const userLogin = asyncErrorHandler(async (req: Request, res: Response, next: NextFunction): Promise<any> => {
-
     const { email, password }: { email: string, password: string } = req.body;
 
-    try {
-        // Find if the user is exist or not : 
-        const user = await userModel.findOne({ email });
-        if (!user) {
-            return next(new ErrorHandler(401, "Invalid email or password!"))
-        }
-        // If user already exist : 
-        // Match the database password and password coming from body : 
+    // Check if the user is exist or not : 
 
-        const isPasswordMatch = await bcrypt.compare(password, user.password);
+    const isUserExist = await userModel.findOne({ email });
 
-        // If password doesn't match .. : 
-
-        if (!isPasswordMatch) {
-            return next(new ErrorHandler(401, "Invalid email or password!"))
-        }
-
-        // If password match : 
-        const userWithoutPassword = await userModel.findOne({ email }).select("-password")
-        return res.status(200).json({ success: true, message: "Welcome Back", user: userWithoutPassword })
-
-
-    } catch (error) {
-        return next(new ErrorHandler(500, `Internal server error! ${error}`));
+    if (!isUserExist) {
+        return next(new ErrorHandler(401, "Invalid username or passowrd!"));
     }
+
+    // compare both password : 
+
+    const isPasswordMatch = await bcrypt.compare(password, isUserExist.password);
+
+    // Check if the passwords are matching or not : 
+
+    if (!isPasswordMatch) {
+        return next(new ErrorHandler(401, "Invalid email or password!"));
+    }
+
+    // Generate token : 
+    createJwtTokenAndCookies(res, isUserExist._id);
+    isUserExist.lastLogin = new Date();
+
+
+    // Send user data without pasword in response : 
+    const userWithoutPassword = isUserExist.toObject();
+    const { password: _, ...rest } = userWithoutPassword;
+
+    return res.status(200).json({ success: true, message: `Welcome back ${isUserExist.fullname}`, user: rest })
 });
 
 
@@ -78,7 +90,7 @@ export const userLogin = asyncErrorHandler(async (req: Request, res: Response, n
 
 export const verifyEmail = asyncErrorHandler(async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 
-    const { otp } = req.body;
+    const { otp }: { otp: string } = req.body;
 
     // Check if the OTP is matching to the specific user : 
 
