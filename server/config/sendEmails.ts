@@ -1,5 +1,5 @@
 import { transport } from './email.config';
-import { VERIFICATION_EMAIL_TEMPLATE, PASSWORD_RESET_REQUEST_TEMPLATE } from './emailTemplate';
+import { VERIFICATION_EMAIL_TEMPLATE, PASSWORD_RESET_REQUEST_TEMPLATE, PASSWORD_RESET_SUCCESS_TEMPLATE } from './emailTemplate';
 
 
 
@@ -24,7 +24,6 @@ export const sendVerificationMail = async (email: string, verificationToken: str
 
 
 // Send reset password token : 
-
 export const sendResetPasswordToken = async (email: string, token: string) => {
 
     try {
@@ -41,3 +40,16 @@ export const sendResetPasswordToken = async (email: string, token: string) => {
         console.log(`Could not send reset password link! : ${error}`);
     }
 }
+
+
+
+// Successful reset email : 
+export const sendSuccessfullResetEmail = async (email: string) => {
+
+    transport.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Your password has been reset",
+        html: PASSWORD_RESET_SUCCESS_TEMPLATE
+    })
+};
