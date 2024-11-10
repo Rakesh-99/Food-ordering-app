@@ -156,8 +156,13 @@ export const forgetPassword = asyncErrorHandler(async (req: Request, res: Respon
         return next(new ErrorHandler(401, "User not found!"));
     }
 
-    // Generate reset password token : 
+    // Check if the user has verified the email or not : 
+    if (!user.isVerified) {
+        return next(new ErrorHandler(401, "You need to verify the email address before performing forget password !"))
+    }
 
+    
+    // Generate reset password token : 
     const resetToken = crypto.randomBytes(20).toString("hex");
     const resetTokenExpire = new Date(Date.now() + 10 * 60 * 1000)// token will be expired after 10 minuites
 
@@ -243,6 +248,11 @@ export const updateUserProfile = asyncErrorHandler(async (req: Request, res: Res
     if (!user) {
         return next(new ErrorHandler(400, "User not found!"));
     }
+
+    if (!user.isVerified) {
+        return next(new ErrorHandler(401, "You need to verify your email before updating !"));
+    }
+
 
     const userImage = req.file;
     const { fullname, email, password, city, address, country }: Partial<IUserTypes> = req.body;
