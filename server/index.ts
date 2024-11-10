@@ -11,16 +11,26 @@ import userRouters from './routes/user.routes';
 import { erroMiddleware } from './middleware/ErrorMiddleware';
 import restaturantRouters from './routes/restaurant.routes';
 import menuRouters from './routes/menu.routes';
+import orderRouter from './routes/order.routes';
 
 
 
+// Middlewares : 
 app.use(cors());
 app.use(cookieParser());
-app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+
+// Routes : 
 app.use('/api/user', userRouters);
 app.use('/api/restaurant', restaturantRouters);
 app.use('/api/menu', menuRouters);
+app.use('/api/order', orderRouter);
+
+
+
+// Error handling middleware : 
 app.use(erroMiddleware);
 
 
