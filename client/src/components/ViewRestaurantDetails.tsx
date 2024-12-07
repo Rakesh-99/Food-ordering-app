@@ -7,6 +7,8 @@ import { BadgeType } from '../constants/dataTypes';
 
 const ViewRestaurantDetails = () => {
 
+    
+
 
     const badgeData: BadgeType[] = [
         {
@@ -24,10 +26,10 @@ const ViewRestaurantDetails = () => {
 
 
 
-    
+
     return (
         <>
-            <div className="w-[95%] m-auto">
+            <div className="w-[95%]  m-auto">
                 <div className="mt-5">
                     <img src={detailsImage} alt="food image" className='rounded-md lg:h-[450px] md:h-[450px] object-cover w-full' />
                 </div>
@@ -48,7 +50,7 @@ const ViewRestaurantDetails = () => {
 
                 {/* Abilable menus  */}
                 <h1 className='font-extrabold text-xl my-5 '>Avilable menus </h1>
-                <div className="grid gap-5 md:grid-cols-2 sm:grid-cols-2 mt-5 lg:grid-cols-4">
+                <div className="grid gap-5 md:grid-cols-2 sm:grid-cols-2 mt-5 lg:grid-cols-3">
                     <AvilableMenus />
                 </div>
             </div>
