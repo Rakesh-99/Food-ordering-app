@@ -55,12 +55,56 @@ export const createMenu = asyncErrorHandler(async (req: Request, res: Response, 
 });
 
 
+// Get all menus : 
+export const getAllMenus = asyncErrorHandler(async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+
+    // Get restaurant first : 
+    const restaurant = await restaurantModel.findOne({ user: req.userId });
+
+    // Check if the restaurant is available : 
+    if (!restaurant) {
+        return next(new ErrorHandler(404, "Restaurant not found!"));
+    }
+    // Get menu ids : 
+    const menus = await menuModel.find({ _id: restaurant.menus });
+    if (!menus) {
+        return next(new ErrorHandler(404, "Menu not found"));
+    }
+    return res.status(200).json({ success: true, message: "Menus have been fetched", menus });
+
+});
+
+
+// Get single menu : 
+export const getSingleMenu = asyncErrorHandler(async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+
+    const { menuId } = req.params;
+
+    // Check if the menu id available or not : 
+    if (!menuId) {
+        return next(new ErrorHandler(404, "Menu id is required!"));
+    }
+
+    const menu = await menuModel.findById({ _id: menuId });
+
+    // Check if the menu is available or not : 
+    if (!menu) {
+        return next(new ErrorHandler(404, "Menu not found!"));
+    }
+    return res.status(200).json({ success: true, message: "Menu has been fetched!", menu });
+});
+
+
 // Update menu : 
 export const updateMenu = asyncErrorHandler(async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 
     const { id } = req.params;
     const { name, description, price }: { name: string, description: string, price: number } = req.body;
     const menuImage = req.file;
+
+
+    // Upload the file on cloudinary : 
+    const cloudinaryImgURL = await uploadOnCloudinary(menuImage?.path);
 
 
     // Find menu :
@@ -70,7 +114,7 @@ export const updateMenu = asyncErrorHandler(async (req: Request, res: Response, 
                 name,
                 description,
                 price,
-                image: menuImage
+                image: cloudinaryImgURL
             }
         },
         { new: true }
