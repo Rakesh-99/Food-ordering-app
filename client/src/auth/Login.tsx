@@ -2,15 +2,22 @@ import { Eye, EyeOff, Loader, LockKeyhole, Mail } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Separator } from "../components/ui/separator";
-import { ChangeEvent, FormEvent, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { loginDataType, userLoginSchema } from "../zod/schema-user/user";
+import { useUserStore } from "../store/userStore";
+
 
 
 
 const Login = () => {
 
-  const [loading] = useState<boolean>(false);
+  const { isAuthenticated, login, loading } = useUserStore((state) => state);
+  const navigate = useNavigate();
+
+
+
+
 
   const [formError, setFormError] = useState<Partial<loginDataType>>();
 
@@ -26,7 +33,7 @@ const Login = () => {
     setLoginInputData({ ...loginInputData, [name]: value });
   };
 
-  const formSubmitHandle = (e: FormEvent) => {
+  const formSubmitHandle = async (e: FormEvent) => {
     e.preventDefault();
 
     // Form validation using zod
@@ -37,10 +44,28 @@ const Login = () => {
       const catchErr = result.error.formErrors.fieldErrors;
       setFormError(catchErr as Partial<loginDataType>);
       return false;
-    } else if (result.success) {
-      console.log("Hello World");
+    }
+
+    // if user enters the correct info, set the form error to undefined :
+    setFormError({
+      email: undefined,
+      password: undefined
+    });
+
+    // Login api implementation : 
+    try {
+      await login(loginInputData);
+    } catch (error) {
+      console.log(error);
     }
   };
+
+  // useEffect to track the isAuthenticated state changes : 
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated])
 
   return (
     <>
