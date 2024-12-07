@@ -3,9 +3,8 @@ import { Button } from "../../components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../../components/ui/dialog";
 import { Input } from "../../components/ui/input"
 import { Label } from "@radix-ui/react-dropdown-menu";
-import { MenuDetailTypes } from "../../constants/dataTypes";
 import { Loader } from "lucide-react";
-// import { Label } from "@/components/ui/label"
+import useMenuStore from "../../store/menu-store/menuStore";
 
 
 
@@ -13,22 +12,32 @@ import { Loader } from "lucide-react";
 
 
 
-const EditMenuCard = ({ editOpenMenu, setEditOpenMenu, menuDetails }: { editOpenMenu: boolean, setEditOpenMenu: Dispatch<SetStateAction<boolean>>, menuDetails: MenuDetailTypes }) => {
+type EditMenuInfoType = {
+    name: string,
+    price: number,
+    description: string,
+    image: File | undefined
+}
 
 
-    const loading = false;
+const EditMenuCard = ({ editOpenMenu, setEditOpenMenu, menuId }: { editOpenMenu: boolean, setEditOpenMenu: Dispatch<SetStateAction<boolean>>, menuId: string }) => {
 
 
-    const [editMenuInfo, setEditMenuInfo] = useState({
-        menu_name: menuDetails.menu_name,
-        menu_price: menuDetails.menu_price,
-        menu_description: menuDetails.menu_description,
-        menu_imageFile: menuDetails.imageFile
+
+    const { loading, updateMenu, selectedMenu } = useMenuStore();
+
+
+
+
+    const [editMenuInfo, setEditMenuInfo] = useState<EditMenuInfoType>({
+        name: "",
+        price: 0,
+        description: "",
+        image: undefined
     })
 
 
-
-
+    // Input change handle : 
     const inputChangeHandle = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value, type } = e.target;
         setEditMenuInfo({
@@ -37,39 +46,44 @@ const EditMenuCard = ({ editOpenMenu, setEditOpenMenu, menuDetails }: { editOpen
         })
     }
 
-    // Function will trigger when the filechange is made :
-
+    // File chnage handle :
     const fileChangeHandle = (e: ChangeEvent<HTMLInputElement>) => {
-
         const file = e.target.files?.[0];
 
-        // function to read the local file image 
-
         if (file) {
-            const fileReader = new FileReader();
-            fileReader.onloadend = (event) => {
-                const result = event.target?.result as string;
-                setEditMenuInfo({ ...editMenuInfo, menu_imageFile: result })
-            }
-
-            fileReader.readAsDataURL(file);
+            setEditMenuInfo({
+                ...editMenuInfo,
+                image: file
+            })
         }
     };
 
     // Function will run when the form is being submitted : 
-
-    const formSubmitHandle = (e: FormEvent<HTMLFormElement>) => {
+    const formSubmitHandle = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        
-
-    }
-
-
+        // form data config : 
+        const formData = new FormData();
+        formData.append("name", editMenuInfo?.name);
+        formData.append("price", editMenuInfo?.price.toString());
+        formData.append("description", editMenuInfo?.description);
+        if (editMenuInfo.image) {
+            formData.append("image", editMenuInfo?.image);
+        }
+        // Api implementation : 
+        await updateMenu(menuId, formData);
+    };
 
 
     useEffect(() => {
-
-    }, []);
+        if (selectedMenu) {
+            setEditMenuInfo({
+                name: selectedMenu.name,
+                description: selectedMenu.description,
+                price: selectedMenu.price,
+                image: undefined
+            })
+        }
+    }, [selectedMenu])
 
 
     return (
@@ -92,9 +106,9 @@ const EditMenuCard = ({ editOpenMenu, setEditOpenMenu, menuDetails }: { editOpen
                                 Name
                             </Label>
                             <Input
-                                name="menu_name"
+                                name="name"
                                 type="text"
-                                value={editMenuInfo.menu_name}
+                                value={editMenuInfo.name}
                                 placeholder="Edit menu name"
                                 className="col-span-3"
                                 onChange={inputChangeHandle}
@@ -107,8 +121,8 @@ const EditMenuCard = ({ editOpenMenu, setEditOpenMenu, menuDetails }: { editOpen
                                 Description
                             </Label>
                             <Input
-                                name="menu_description"
-                                value={editMenuInfo.menu_description}
+                                name="description"
+                                value={editMenuInfo.description}
                                 type="text"
                                 placeholder="Edit menu description"
                                 className="col-span-3"
@@ -122,8 +136,8 @@ const EditMenuCard = ({ editOpenMenu, setEditOpenMenu, menuDetails }: { editOpen
                                 Price
                             </Label>
                             <Input
-                                value={editMenuInfo.menu_price}
-                                name="menu_price"
+                                value={editMenuInfo.price}
+                                name="price"
                                 type="number"
                                 placeholder="Edit menu price"
                                 className="col-span-3"
@@ -139,7 +153,7 @@ const EditMenuCard = ({ editOpenMenu, setEditOpenMenu, menuDetails }: { editOpen
                                 Image
                             </Label>
                             <Input
-                                name="menu_imageFile"
+                                name="image"
                                 type="file"
                                 accept="image/*"
                                 className="col-span-3"
@@ -149,7 +163,7 @@ const EditMenuCard = ({ editOpenMenu, setEditOpenMenu, menuDetails }: { editOpen
 
                         <div className="grid grid-cols-4  items-center gap-">
                             <p>CurrentImage:</p>
-                            <p className="ml-5">{String(editMenuInfo.menu_imageFile).slice(0, 30)}</p>
+                            <p className="ml-5">{editMenuInfo.image ? editMenuInfo.image.name : "No image selected"}</p>
                         </div>
 
                         <DialogFooter>
@@ -158,7 +172,7 @@ const EditMenuCard = ({ editOpenMenu, setEditOpenMenu, menuDetails }: { editOpen
                                 loading ?
                                     <Button disabled className="bg-blue-500 w-full flex items-center gap-2 hover:bg-blue-600" type="submit"> <Loader className="animate-spin" /> <p>Please wait</p></Button>
                                     :
-                                    <Button className="bg-blue-500 w-full hover:bg-blue-600" type="submit">Save changes</Button>
+                                    <Button onClick={() => setEditOpenMenu(false)} className="bg-blue-500 w-full hover:bg-blue-600" type="submit">Save changes</Button>
                             }
                         </DialogFooter>
                     </form>
