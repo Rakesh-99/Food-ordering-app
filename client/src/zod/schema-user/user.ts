@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { TypeOf, z } from "zod";
 // Signup  data - zod 
 export const userSignupSchema = z.object({
     fullname: z
@@ -43,3 +43,11 @@ export const resetPasswordSchema = z.object({
         .regex(/[0-9]/, "Password must contain at least one number")
 })
 export type resetPasswordType = z.infer<typeof resetPasswordSchema>
+
+
+
+// Vrify otp : 
+export const verifyEmailSchema = z.string()
+    .length(6, { message: "Incorrect OTP. Enter the six digit OTP received on your email!" });
+
+export type verifyOtpType = z.infer<typeof verifyEmailSchema>
