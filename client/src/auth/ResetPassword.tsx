@@ -5,13 +5,14 @@ import { Separator } from "../components/ui/separator";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { resetPasswordSchema, resetPasswordType } from '../zod/schema-user/user';
+import { useUserStore } from "../store/userStore";
 
 
 
 
 const ResetPassword = () => {
 
-    const [loading] = useState<boolean>(false);
+    const { loading, resetPassword } = useUserStore();
 
     const [formError, setFormError] = useState<Partial<resetPasswordType>>();
 
@@ -25,7 +26,7 @@ const ResetPassword = () => {
         setPasswordData({ ...passwordData, [name]: value })
     };
 
-    const formSubmitHandle = (e: FormEvent) => {
+    const formSubmitHandle = async (e: FormEvent) => {
         e.preventDefault();
 
         // Form validation using zod
@@ -39,7 +40,8 @@ const ResetPassword = () => {
 
         setFormError(undefined);
 
-        // Api implementation 
+        //Reset password Api implementation : 
+        await resetPassword(passwordData);
 
 
     };
@@ -86,7 +88,7 @@ const ResetPassword = () => {
                                 type="submit"
                                 className="w-full  py-6 text-lg bg-dayAccentColor hover:bg-dayAccentColorOnHover"
                             >
-                                Send reset password
+                                Reset
                             </Button>
                         )}
                     </div>
