@@ -12,7 +12,9 @@ export interface IRestaurantSchemaTypes extends Document {
     deliveryTime: number;
     cuisines: string[];
     menus: mongoose.Schema.Types.ObjectId[];
-    imageURL: string
+    imageURL: string,
+    country: string,
+    description: string
 }
 
 
@@ -28,9 +30,17 @@ const restaurantSchema = new mongoose.Schema<IRestaurantSchemaTypes>({
         type: String,
         required: [true, 'Restaurant name is required!']
     },
+    country: {
+        type: String,
+        required: [true, "Country is required af"]
+    },
     city: {
         type: String,
         required: [true, 'City is required!']
+    },
+    description: {
+        type: String,
+        required: [true, "Description is required!"]
     },
     deliveryTime: {
         type: Number,
