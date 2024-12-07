@@ -5,14 +5,15 @@ import { Separator } from "../components/ui/separator";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { isEmailValidType, forgetPasswordSchema } from '../zod/schema-user/user';
+import { useUserStore } from "../store/userStore";
 
 
 
 const ForgetPassword = () => {
 
-    const [loading] = useState<boolean>(false);
-
     const [formError, setFormError] = useState<Partial<isEmailValidType>>();
+    const { loading, forgetPassword } = useUserStore();
+
 
 
     const [emailAddress, setEmailAddress] = useState<Partial<isEmailValidType>>({
@@ -24,7 +25,7 @@ const ForgetPassword = () => {
         setEmailAddress({ ...emailAddress, [name]: value })
     };
 
-    const formSubmitHandle = (e: FormEvent) => {
+    const formSubmitHandle = async (e: FormEvent) => {
         e.preventDefault();
 
         // Form validation using zod
@@ -34,11 +35,12 @@ const ForgetPassword = () => {
             setFormError(catchErr as Partial<isEmailValidType>);
             return;
         }
+
+        // if user enters the correct info, set the form error to undefined :
         setFormError(undefined);
 
-
-
-
+        //Forget password API implementation : 
+        await forgetPassword(emailAddress);
     };
 
     return (
