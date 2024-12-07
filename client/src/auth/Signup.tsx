@@ -11,25 +11,23 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Separator } from "../components/ui/separator";
 import { ChangeEvent, FormEvent, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { Navigate, NavLink, useNavigate } from "react-router-dom";
 import { signupDataType, userSignupSchema } from "../zod/schema-user/user";
+import { useUserStore } from "../store/userStore";
 
-type loadingState = boolean;
+
 type passwordVisibility = boolean;
 
 const Signup = () => {
 
 
-
-
-
-
-
+  const navigate = useNavigate();
+  const { signup, loading } = useUserStore((state) => state);
 
 
   const [formError, setFormError] = useState<Partial<signupDataType>>({});
 
-  const [loading] = useState<loadingState>(false);
+
 
   const [hidePassword, setHidePassword] = useState<passwordVisibility>(true);
 
@@ -45,7 +43,7 @@ const Signup = () => {
     setSignupInputData({ ...signupInputData, [name]: value });
   };
 
-  const formSubmitHandle = (e: FormEvent) => {
+  const formSubmitHandle = async (e: FormEvent) => {
     e.preventDefault();
 
     // Form validation using zod
@@ -58,7 +56,21 @@ const Signup = () => {
       return false;
     }
 
-    // Signup Api implementation 
+    // if user enters the correct info, set the form error to undefined :
+    setFormError({
+      email: undefined,
+      password: undefined,
+      fullname: undefined,
+      contact: undefined
+    });
+
+    //  Signup api implementations : 
+    try {
+      await signup(signupInputData);
+      navigate('/verify-email');
+    } catch (error) {
+      console.log(error);
+    }
 
   };
 
