@@ -1,10 +1,10 @@
 import { Loader, Verified } from "lucide-react";
 import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
 import { Separator } from "../components/ui/separator";
-import { ChangeEvent, FormEvent, useState } from "react";
-import { NavLink } from "react-router-dom";
-
+import { FormEvent, useEffect, useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { verifyEmailSchema, verifyOtpType } from '../zod/schema-user/user';
+import { useUserStore } from "../store/userStore";
 
 
 
@@ -12,23 +12,40 @@ import { NavLink } from "react-router-dom";
 
 const VerifyEmail = () => {
 
-    const [loading] = useState<boolean>(false);
+    const [formError, setFormError] = useState("");
+    const navigate = useNavigate();
 
-    const [formError, setFormError] = useState<string>('');
+    const [verificationCode, setVerificationCode] = useState<verifyOtpType>();
 
-    const [otp, setOtp] = useState<string>('');
+    const { emailVerify, loading, isEmailVerified } = useUserStore((state) => state);
 
-    const inputChangeHandle = (e: ChangeEvent<HTMLInputElement>) => {
-        const { value } = e.target
-        setOtp(value);
-    };
-
-    const formSubmitHandle = (e: FormEvent) => {
+    const formSubmitHandle = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        // Api implementation 
+        // Form validation using zod : 
 
+        const response = verifyEmailSchema.safeParse(verificationCode);
+        if (!response.success) {
+            const catchErr = response.error.errors.map((err) => err.message).join("\n")
+            setFormError(catchErr)
+
+        }
+
+        // verify email api implementation : 
+        try {
+            await emailVerify(verificationCode!);
+        } catch (error) {
+            console.log(error);
+        }
     };
+
+    // useEffect to track the isEmailVerified state changes :
+    useEffect(() => {
+        if (isEmailVerified) {
+            navigate('/login');
+        }
+    }, [isEmailVerified]);
+
 
     return (
         <>
@@ -40,25 +57,28 @@ const VerifyEmail = () => {
                     onSubmit={formSubmitHandle}
                     className="md:border lg:border md:w-2/3 lg:w-1/3 w-full  p-5 rounded-md"
                 >
-                    {/* Email   */}
-                    <label className="">Enter OTP</label>
-                    <div className="mb-4 mt-1 relative">
-                        <Input
-                            name="otp"
-                            value={otp}
-                            required
-                            className="pl-10 text-center text-lg focus-visible:ring-0"
-                            type="text"
-                            placeholder="Enter OTP reveived on registered email"
-                            onChange={inputChangeHandle}
-                            minLength={6}
-                            maxLength={6}
-                        />
-                        <Verified className="absolute inset-y-2 left-2 text-gray-500 w-5 h-5 pointer-events-none" />
-                        {formError && (
-                            <p className="text-xs text-red-500">{formError}</p>
-                        )}
+                    {/* Email  label */}
+                    <div className="flex  items-center gap-2">
+                        <label className="">Enter OTP</label>
+                        <Verified className=" text-gray-500 w-5 h-5 pointer-events-none" />
                     </div>
+
+
+                    {/* Email input :  */}
+                    <div className="my-3">
+                        <div className="text-center flex justify-center items-center" >
+                            <input
+                                type="text"
+                                name="otp"
+                                className=" w-full border outline-none h-10 text-center font-bold text-2xl"
+                                onChange={(e) => { setVerificationCode(e.target.value) }}
+                            />
+                        </div>
+                    </div>
+                    {formError && (
+                        <p className="text-xs text-red-500">{formError}</p>
+                    )}
+
 
                     {/* Button  */}
                     <div className="transition-all duration-1000">
