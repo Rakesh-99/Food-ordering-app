@@ -5,38 +5,25 @@ import { Button } from "../../components/ui/button";
 import { ChangeEvent, Dispatch, FormEvent, SetStateAction, useState } from "react";
 import { RestaurantMenuTypes, restaurantMenuSchema } from '../../zod/schema-restaurantMenu/restaurant-menu';
 import { Loader } from "lucide-react";
+import useMenuStore from "../../store/menu-store/menuStore";
 
 const PopupModalMenu = ({ openMenu, setOpenMenu }: { openMenu: boolean, setOpenMenu: Dispatch<SetStateAction<boolean>> }) => {
 
+    const [formError, setFormError] = useState<Partial<RestaurantMenuTypes>>();
+
+    const { loading, createMenu, updateMenu } = useMenuStore();
 
 
     const [formData, setFormData] = useState<RestaurantMenuTypes>({
 
-        menu_price: 0,
-        menu_description: '',
-        menu_name: '',
-        menu_imageFile: ''
-    })
-    const [formError, setFormError] = useState<Partial<RestaurantMenuTypes>>();
-    const loading = false;
+        price: 0,
+        description: '',
+        name: '',
+        image: ''
+    });
 
 
-    const formSubmitHandle = (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
-        const result = restaurantMenuSchema.safeParse(formData);
-
-        if (result.error) {
-            const catchError = result.error.formErrors.fieldErrors;
-            setFormError(catchError as Partial<RestaurantMenuTypes>)
-            return false;
-        }
-
-        // Api implementation 
-
-
-    }
-
+    // Input change handle : 
     const inputChangeHandle = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value, type } = e.target;
 
@@ -46,22 +33,48 @@ const PopupModalMenu = ({ openMenu, setOpenMenu }: { openMenu: boolean, setOpenM
         })
     }
 
+
+    // File change handle : 
     const fileChangeHandle = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-
         if (file) {
-            const fileReader = new FileReader();
-
-            fileReader.onloadend = (event) => {
-                const result = event.target?.result as string
-                setFormData({
-                    ...formData,
-                    menu_imageFile: result
-                })
-            }
-            fileReader.readAsDataURL(file);
+            setFormData({
+                ...formData,
+                image: file
+            })
         }
     }
+
+    // Form submit handle : 
+    const formSubmitHandle = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+
+        // Zod form validation : 
+        const result = restaurantMenuSchema.safeParse(formData);
+
+        if (result.error) {
+            const catchError = result.error.formErrors.fieldErrors;
+            setFormError(catchError as Partial<RestaurantMenuTypes>)
+            return false;
+        }
+
+        // Form Data handle : 
+        const formDataSetup = new FormData();
+        formDataSetup.append("name", formData.name);
+        formDataSetup.append("price", formData.price.toString());
+        formDataSetup.append("description", formData.description);
+        // check if the image available or not then append the image in formData : 
+        if (formData.image) {
+            formDataSetup.append("image", formData.image);
+        }
+
+        // Api implementation : 
+        await createMenu(formDataSetup);
+    }
+
+
+
 
 
 
@@ -95,14 +108,14 @@ const PopupModalMenu = ({ openMenu, setOpenMenu }: { openMenu: boolean, setOpenM
                                         <Input
                                             type="text"
                                             onChange={inputChangeHandle}
-                                            value={formData.menu_name}
-                                            name="menu_name"
+                                            value={formData.name}
+                                            name="name"
                                             placeholder="Name"
                                             className="col-span-3"
                                         />
                                         {
                                             formData &&
-                                            <p className="text-sm text-red-500 ml-1">{formError?.menu_name}</p>
+                                            <p className="text-sm text-red-500 ml-1">{formError?.name}</p>
                                         }
 
                                     </div>
@@ -119,14 +132,14 @@ const PopupModalMenu = ({ openMenu, setOpenMenu }: { openMenu: boolean, setOpenM
                                         <Input
                                             type="text"
                                             onChange={inputChangeHandle}
-                                            value={formData.menu_description}
-                                            name="menu_description"
+                                            value={formData.description}
+                                            name="description"
                                             placeholder="Description"
                                             className="col-span-3"
                                         />
                                         {
                                             formData &&
-                                            <p className="text-sm text-red-500 ml-1">{formError?.menu_description}</p>
+                                            <p className="text-sm text-red-500 ml-1">{formError?.description}</p>
                                         }
 
                                     </div>
@@ -143,14 +156,14 @@ const PopupModalMenu = ({ openMenu, setOpenMenu }: { openMenu: boolean, setOpenM
                                         <Input
                                             type="number"
                                             onChange={inputChangeHandle}
-                                            value={formData.menu_price}
-                                            name="menu_price"
+                                            value={formData.price}
+                                            name="price"
                                             placeholder="Price"
                                             className="col-span-3"
                                         />
                                         {
                                             formData &&
-                                            <p className="text-sm text-red-500 ml-1">{formError?.menu_price}</p>
+                                            <p className="text-sm text-red-500 ml-1">{formError?.price}</p>
                                         }
                                     </div>
                                 </div>
@@ -162,13 +175,14 @@ const PopupModalMenu = ({ openMenu, setOpenMenu }: { openMenu: boolean, setOpenM
                                     </Label>
                                     <Input
                                         onChange={fileChangeHandle}
-                                        name="menu_imageFile"
+                                        name="image"
                                         type="file"
+                                        accept="image/*"
                                         className="col-span-3"
                                     />
                                     {
                                         formData &&
-                                        <p className="text-sm text-red-500 ml-1">{formError?.menu_imageFile}</p>
+                                        <p className="text-sm text-red-500 ml-1">{formError?.image}</p>
                                     }
                                 </div>
 
