@@ -11,9 +11,13 @@ import { ImProfile } from "react-icons/im";
 import { RxUpdate } from "react-icons/rx";
 
 import { RiRestaurantFill } from "react-icons/ri";
-import { Moon, Sun } from "lucide-react";
+import { Loader2, Moon, Sun } from "lucide-react";
 import { Link } from "react-router-dom";
 import { NavLinksTypes } from "../constants/dataTypes";
+import { useUserStore } from "../store/userStore";
+
+
+
 
 
 
@@ -21,7 +25,7 @@ import { NavLinksTypes } from "../constants/dataTypes";
 
 const Header = () => {
 
-  // const [theme, setTheme] = useState("");
+  const { logout, loading, isAuthenticated, user } = useUserStore();
 
   const navlinks: NavLinksTypes[] = [
 
@@ -43,14 +47,10 @@ const Header = () => {
   ]
 
 
+  const logoutHandle = async () => {
+    await logout();
+  };
 
-  // const [dropDown, setDropDown] = useState<DropDownTypes>({
-  //   showStatusBar: true,
-  //   showActivityBar: false,
-  //   showPanel: false
-  // });
-
-  const admin = true;
 
   return (
     <>
@@ -87,7 +87,7 @@ const Header = () => {
 
             {/* Dashboard */}
             {
-              admin &&
+              user && user?.admin &&
               <div className="">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -150,9 +150,29 @@ const Header = () => {
               <FaCircleUser size={22} />
             </div>
 
-            <div className="">
-              <button className="font-semibold bg-red-500 text-white py-2 px-3 rounded-sm">Logout</button>
-            </div>
+            {/* Logout button :  */}
+            {/* Rendering the login and logout button based on the user existence :  */}
+
+            {
+              isAuthenticated ?
+                <div className="">
+                  {
+                    loading ?
+                      <button disabled className="flex items-center justify-center gap-1 font-semibold bg-red-500 text-white py-2 px-3 rounded-sm">
+                        <p>Logout..</p>
+                        <Loader2 />
+                      </button>
+                      :
+                      <button onClick={logoutHandle} className="font-semibold bg-red-500 text-white py-2 px-3 rounded-sm">Logout</button>
+                  }
+                </div>
+                :
+                <Button >
+                  <Link to={'/login'}>Get started</Link>
+                </Button>
+            }
+
+
           </div>
         </div >
       </div>
@@ -173,6 +193,11 @@ export default Header;
 
 export const SmallerScreenHeader = () => {
 
+  const { logout, loading, isAuthenticated, user } = useUserStore((state) => state);
+
+  const logoutHandle = async () => {
+    await logout();
+  };
 
   const navlinks: NavLinksTypes[] = [
 
@@ -182,15 +207,19 @@ export const SmallerScreenHeader = () => {
       icon: IoHomeOutline
     },
     {
-      path: '/admin/order',
-      label: 'Order',
+      path: '/restaurant-orders',
+      label: 'Restaurant Orders',
       icon: RxUpdate
     },
+
     {
       path: '/cart',
       label: 'Cart',
       icon: IoCart
-    },
+    }
+  ];
+
+  const adminRoutes = [
     {
       path: '/admin/available-menu',
       label: 'Menu',
@@ -203,10 +232,10 @@ export const SmallerScreenHeader = () => {
 
     },
     {
-      path: '/restaurant-orders',
-      label: 'Restaurant Orders',
+      path: '/admin/order',
+      label: 'Order',
       icon: RxUpdate
-    }
+    },
   ]
 
   return (
@@ -251,25 +280,69 @@ export const SmallerScreenHeader = () => {
               </div>
             </SheetHeader>
 
-            <div className="flex flex-col gap-1 ">
+            <div className="flex  flex-col gap-1 ">
               {
                 navlinks.map((val: NavLinksTypes, idx: number): JSX.Element => {
                   return (
-                    <SheetClose asChild className="flex my-3 gap-3" key={idx}>
-                      <Link className="text-xl" to={val.path}>
+                    <SheetClose asChild className="flex gap-2" key={idx}>
+                      <Link className="my-2" to={val.path}>
                         <val.icon size={22} />
-                        <p>{val.label}</p>
+                        <p className="text-base font-medium">{val.label}</p>
                       </Link>
                     </SheetClose>
                   )
                 })
+              }
+
+              {
+                user && user?.admin &&
+                <div className="">
+                  {
+                    adminRoutes.map((val: NavLinksTypes, idx: number) => {
+                      return (
+                        <SheetClose asChild className="flex gap-2" key={idx}>
+                          <Link className="my-4" to={val.path}>
+                            <val.icon size={22} />
+                            <p className="text-base font-medium">{val.label}</p>
+                          </Link>
+                        </SheetClose>
+                      )
+                    })
+                  }
+                </div>
               }
             </div>
 
 
             <SheetFooter className="">
               <SheetClose asChild>
-                <Button type="submit" className="bg-violet-500 font-semibold ">Logout</Button>
+
+                {/* conditionally rendering the login and logout based on user existence  */}
+
+                <div className="">
+                  {
+                    isAuthenticated
+                      ?
+
+                      <div className="w-full">
+                        {
+                          loading ?
+                            <button disabled className="flex w-full items-center justify-center gap-1 font-semibold bg-red-500 text-white py-2 px-3 rounded-sm">
+                              <p>Logout..</p>
+                              <Loader2 />
+                            </button>
+                            :
+                            <button onClick={logoutHandle} className="font-semibold bg-red-500 text-white py-2 px-3 rounded-sm w-full">Logout</button>
+                        }
+                      </div>
+                      :
+                      <Button className="w-full">
+                        <Link to={'/login'}>Get Started</Link>
+                      </Button>
+                  }
+                </div>
+
+
               </SheetClose>
             </SheetFooter>
 
