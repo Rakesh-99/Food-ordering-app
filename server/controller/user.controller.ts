@@ -32,6 +32,9 @@ interface IUserTypes {
 export const userSignup = asyncErrorHandler(async (req: Request, res: Response, next: NextFunction): Promise<any> => {
     const { fullname, email, password, contact }: { fullname: string, email: string, password: string, contact: string } = req.body;
 
+    console.log("Api hit", fullname, email, password, contact);
+
+
 
     // Check if the user is already exist in db : 
     const isUserExist = await userModel.findOne({ email });
@@ -57,7 +60,7 @@ export const userSignup = asyncErrorHandler(async (req: Request, res: Response, 
     await newUser.save();
 
     // convert the mongoose document in plain object, then send the new user data in response without password : 
-    const { password: _, ...rest } = newUser.toObject();
+    const { password: _, verificationToken, ...rest } = newUser.toObject();
 
 
     // Create jwt token and set cookies : 
@@ -138,7 +141,7 @@ export const userLogin = asyncErrorHandler(async (req: Request, res: Response, n
 export const logoutUser = asyncErrorHandler(async (req: Request, res: Response, next: NextFunction): Promise<any> => {
     return res.clearCookie("token").status(200).json({
         success: true,
-        message: "You have been log out "
+        message: "Logout successfull"
     })
 });
 
@@ -161,7 +164,7 @@ export const forgetPassword = asyncErrorHandler(async (req: Request, res: Respon
         return next(new ErrorHandler(401, "You need to verify the email address before performing forget password !"))
     }
 
-    
+
     // Generate reset password token : 
     const resetToken = crypto.randomBytes(20).toString("hex");
     const resetTokenExpire = new Date(Date.now() + 10 * 60 * 1000)// token will be expired after 10 minuites
@@ -226,14 +229,13 @@ export const resetPassword = asyncErrorHandler(async (req: Request, res: Respons
 
 // Check auth : 
 export const checkAuth = asyncErrorHandler(async (req: Request, res: Response, next: NextFunction): Promise<any> => {
-
-    const user = await userModel.findById({ _id: req.userId }).select("-password");
+    const userId = req.userId;
+    const user = await userModel.findById({ _id: userId }).select("-passowrd");
 
     if (!user) {
-        return next(new ErrorHandler(401, "User not found !"));
+        return next(new ErrorHandler(400, "User not found!"));
     }
-
-    return res.status(200).json({ success: true, message: "Your profile has been fetched", user });
+    return res.status(200).json({ success: true, message: "User has been fetched", user: user });
 });
 
 
