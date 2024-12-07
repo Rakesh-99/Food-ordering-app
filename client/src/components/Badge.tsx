@@ -9,7 +9,7 @@ const Badge = ({ data }: { data: { foodName: string }[] }) => {
                 data.map((val: { foodName: string }, idx: number) => {
 
                     return (
-                        <div className="bg-black text-white px-2 text-center py-[2px] rounded-full" key={idx}>
+                        <div className="bg-black text-white px-2 text-sm py-1 text-center rounded-full" key={idx}>
                             <p className="">{val.foodName}</p>
                         </div>
                     )
