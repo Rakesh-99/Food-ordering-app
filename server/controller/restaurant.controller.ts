@@ -5,15 +5,18 @@ import userModel from '../models/user.model';
 import { ErrorHandler } from '../utils/ErrorHandler';
 import { uploadOnCloudinary } from '../utils/cloudinary-setup/cloudinary';
 import { unlink } from 'fs/promises';
+import orderModel from '../models/order.model';
 
 
 
 interface RestaurantTypes {
     restaurantName: string,
     city: string,
+    description: string
     deliveryTime: number,
     menus: string[],
-    cuisines: string[]
+    cuisines: string[],
+    country: string
 }
 
 
@@ -28,7 +31,10 @@ export const createRestaurant = asyncErrorHandler(async (req: Request, res: Resp
         return next(new ErrorHandler(401, "You are not verified, Please verify your email!"));
     }
 
-    const { restaurantName, city, deliveryTime, menus, cuisines }: RestaurantTypes = req.body;
+    const { restaurantName, city, deliveryTime, menus, cuisines, country, description }: RestaurantTypes = req.body;
+
+    const parsedCuisines = cuisines && typeof cuisines === 'string' ? JSON.parse(cuisines) : cuisines;
+
     const restaurantImage = req.file;
 
     // Check if the restaurant has this user or not : 
@@ -51,10 +57,12 @@ export const createRestaurant = asyncErrorHandler(async (req: Request, res: Resp
     const createNewRestaurant = new restaurantModel({
         user: req.userId,
         restaurantName,
+        country,
         city,
         deliveryTime,
+        description,
         menus,
-        cuisines,
+        cuisines: parsedCuisines,
         imageURL: cloudinaryResponse
     });
     await createNewRestaurant?.save();
@@ -84,17 +92,18 @@ export const getRestaurantDetails = asyncErrorHandler(async (req: Request, res: 
 // Update restaurant : 
 export const updateRestaurant = asyncErrorHandler(async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 
-    const { restaurantName, city, cuisines, menus, deliveryTime }: Partial<RestaurantTypes> = req.body;
+    const { restaurantName, city, cuisines, menus, deliveryTime, description, country }: Partial<RestaurantTypes> = req.body;
     const file = req.file;
 
+    // check if the cuisines are string , if string parse it : 
+
+    const parsedCuisines = typeof cuisines === 'string' ? JSON.parse(cuisines) : cuisines;
 
     const restaurant = await restaurantModel.findOne({ user: req.userId });
 
     if (!restaurant) {
         return next(new ErrorHandler(400, "Restaurant not found!"));
     }
-
-
     // Check if the file  is availbale or not :
 
     let cloudinryImgURL;
@@ -107,24 +116,22 @@ export const updateRestaurant = asyncErrorHandler(async (req: Request, res: Resp
     const updatedRestaurant = await restaurantModel.findOneAndUpdate({ user: req.userId },
         {
             $set: {
-                restaurantName: restaurantName || restaurant.restaurantName,
-                city: city || restaurant.city,
-                deliveryTime: deliveryTime || restaurant.deliveryTime,
-                cuisines: cuisines || restaurant.cuisines,
-                menus: menus || restaurant.menus,
-                imageURL: cloudinryImgURL || restaurant.imageURL
+                restaurantName: restaurantName ?? restaurant.restaurantName,
+                country: country ?? restaurant.country,
+                city: city ?? restaurant.city,
+                deliveryTime: deliveryTime ?? restaurant.deliveryTime,
+                cuisines: parsedCuisines ?? restaurant.cuisines,
+                menus: menus ?? restaurant.menus,
+                description: description ?? restaurant.description,
+                imageURL: cloudinryImgURL ?? restaurant.imageURL
             }
         },
         { new: true }
     );
-    await updatedRestaurant?.save();
-
-
     // Delete the file from public folder after being pushed to the server : 
-    if (updatedRestaurant && file) {
+    if (file && updatedRestaurant) {
         unlink(file.path)
     };
-
     return res.status(200).json({ success: true, message: "Restaurant has been updated", updatedRestaurant });
 });
 
@@ -145,5 +152,181 @@ export const deleteRestaurant = asyncErrorHandler(async (req: Request, res: Resp
 });
 
 
+
+// Get restaurant orders : 
+export const getRestaurantOrder = asyncErrorHandler(async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+
+
+    const restaurant = await restaurantModel.findOne({ user: req.userId });
+    if (!restaurant) {
+        return next(new ErrorHandler(404, "Restaurant not found!"));
+    }
+
+    // Restaurant available , now fetch restaurant's orders : 
+
+    const order = await orderModel.findOne({ restaurant: restaurant._id }).populate("restaurant").populate("user");
+    if (!order) {
+        return next(new ErrorHandler(404, "NO orders found"));
+    }
+    return res.status(200).json({ success: true, message: "Orders have been fetched", orders: order });
+
+});
+
+
+// Update order status : 
+export const updateOrderStaus = asyncErrorHandler(async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+
+    const { orderId } = req.params;
+    const { orderStatus } = req.body;
+
+    // find the order : 
+    const order = await orderModel.findOne({ _id: orderId });
+    if (!order) {
+        return next(new ErrorHandler(404, "Order not found!"));
+    }
+
+    // Update the order status : 
+
+    const updateOrderStausInfo = await orderModel.findByIdAndUpdate({ _id: orderId }, {
+        $set: {
+            status: orderStatus
+        }
+    }, { new: true }
+    );
+
+    // Save the changes : 
+    await updateOrderStausInfo?.save();
+
+    return res.status(200).json({ success: true, message: "Order status has been updated", orderStatusData: updateOrderStausInfo })
+
+})
+
+
+
+// Search restaurant : 
+// export const searchRestaurant = asyncErrorHandler(async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+
+//     const searchParamsText = req.params.searchParamsText || ""
+//     const searchQuery = req.query.searchQuery || "";
+//     const getCuisines = (req.query.getCuisines! as string || "").split(",").map((cuisines) => cuisines);
+
+//     const queryData: any = {};
+//     // Search restaurant based on search text : 
+//     if (searchParamsText) {
+//         console.log('Params -', searchParamsText);
+
+//         queryData.$or = [
+//             {
+//                 restaurantName: {
+//                     $regex: searchParamsText,
+//                     $options: 'i'
+//                 }
+//             },
+//             {
+//                 city: {
+//                     $regex: searchParamsText,
+//                     $options: 'i'
+//                 }
+//             },
+//             {
+//                 country: {
+//                     $regex: searchParamsText,
+//                     $options: 'i'
+//                 }
+//             }
+//         ]
+//     }
+//     // Filter restaurant based on the quires:
+//     if (searchQuery) {
+//         console.log("Query - ", searchQuery);
+//         queryData.$or = [
+//             {
+//                 restaurantName: {
+//                     $regex: searchQuery,
+//                     $options: 'i'
+//                 },
+//             },
+//             {
+//                 cuisines: {
+//                     $regex: searchQuery,
+//                     $options: 'i'
+//                 }
+//             }
+//         ]
+//     }
+//     if (getCuisines.length > 0) {
+//         console.log(getCuisines);
+//         queryData.cuisines = { $in: getCuisines }
+//     }
+
+//     const result = await restaurantModel.find(queryData);
+
+//     // If queryData is empty, return an error
+//     if (Object.keys(queryData).length === 0) {
+//         return next(new ErrorHandler(400, "Invalid search parameters."));
+//     }
+
+//     if (!result || result.length < 1) {
+//         return next(new ErrorHandler(404, "No Restaurant found!"));
+//     }
+//     console.log("The query Data is -", queryData);
+
+//     return res.status(200).json({ success: true, message: "Restaurants have been fetched", restaurants: result });
+// });
+
+export const searchRestaurant = asyncErrorHandler(async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+    const searchParamsText = req.params.searchParamsText || "";
+    const searchQuery = req.query.searchQuery || "";
+    const getCuisines = (req.query.getCuisines! as string || "").split(",").map((cuisines) => cuisines);
+
+
+    const queryData: any = {};
+
+    // Searching in params : 
+    if (searchParamsText) {
+        queryData.$or = [
+            { restaurantName: { $regex: searchParamsText, $options: "i" } },
+            { country: { $regex: searchParamsText, $options: "i" } },
+            { city: { $regex: searchParamsText, $options: "i" } }
+        ]
+    }
+
+    // Searching in queries : 
+    if (searchQuery) {
+        queryData.$or = [
+            { restaurantName: { $regex: searchQuery, $options: "i" } },
+            { cuisines: { $regex: searchQuery, $options: "i" } }
+        ]
+    }
+
+    // Searching in cuisines : 
+    if (getCuisines.length > 0) {
+        queryData.cuisines = { $in: getCuisines }
+    }
+
+
+    const result = await restaurantModel.find(queryData);
+
+    if (!result || result.length < 1) {
+        return next(new ErrorHandler(404, "No restaurants found."));
+    }
+
+    return res.status(200).json({ success: true, message: "Restaurants fetched.", restaurants: result });
+});
+
+
+
+
+// Get single restaurant : 
+export const getRestaurant = asyncErrorHandler(async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+
+    const restaurant = await restaurantModel.findOne({ user: req.userId }).populate("menus")
+
+    if (!restaurant) {
+        return next(new ErrorHandler(404, "Restaurant not found!"));
+    }
+
+    return res.status(200).json({ success: true, message: "Restaurant has been fetched", restaurant });
+})
 
 
