@@ -1,8 +1,11 @@
 import { Label } from "@radix-ui/react-dropdown-menu"
 import RestaurantImg from '../../assets/restaurant image/restaurantImg.png';
 import { Button } from "../../components/ui/button";
-import { useState, ChangeEvent, FormEvent } from 'react';
-import { restaurantSchema, RestaurantDataTypes } from "../../zod/schema-restaurant/restaurant";
+import { useState, ChangeEvent, FormEvent, useEffect } from 'react';
+import { restaurantSchema, RestaurantDataTypes } from '../../zod/schema-restaurant/restaurant';
+import useRestaurantStore from "../../store/restaurantStore";
+import { Loader } from "lucide-react";
+
 
 
 
@@ -11,14 +14,16 @@ const Restaurant = () => {
 
     const [formError, setFormError] = useState<Partial<RestaurantDataTypes>>()
 
-    const [restaurantInfo, setRestaurantInfo] = useState({
-        restaurant_name: '',
-        restaurant_city: '',
-        restaurant_country: '',
-        delivery_time: 0,
+    const { createRestaurant, loading, restaurant, getRestaurant, updateRestaurant } = useRestaurantStore();
+
+    const [restaurantInfo, setRestaurantInfo] = useState<RestaurantDataTypes>({
+        restaurantName: '',
+        city: '',
+        country: '',
+        deliveryTime: 0,
         cuisines: [],
         description: '',
-        restaurant_image: ''
+        imageURL: undefined
     });
 
 
@@ -28,44 +33,80 @@ const Restaurant = () => {
             ...restaurantInfo,
             [name]: type === 'number' ? Number(value) : value
         })
-    }
+    };
 
-
-
+    // file change handle : 
     const fileChangeHandle = (e: ChangeEvent<HTMLInputElement>) => {
-        const rawFile = e.target.files?.[0];
+        const file = e.target.files?.[0];
 
-
-        if (rawFile) {
-            const fileReader = new FileReader();
-
-            fileReader.onloadend = (event) => {
-                const result = event.target?.result as string;
-
-                setRestaurantInfo({
-                    ...restaurantInfo,
-                    restaurant_image: result
-                })
-            }
-            fileReader.readAsDataURL(rawFile)
+        if (file) {
+            setRestaurantInfo({
+                ...restaurantInfo,
+                imageURL: file
+            })
         }
     }
 
-    const formSubmitHandle = (e: FormEvent<HTMLFormElement>) => {
+
+    // Form Submit handle : 
+    const formSubmitHandle = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log(restaurantInfo);
 
+        // Zod form validation : 
         const response = restaurantSchema.safeParse(restaurantInfo);
-
         if (response.error) {
             const catchError = response.error.formErrors.fieldErrors;
             setFormError(catchError as Partial<RestaurantDataTypes>);
-
             return false;
-        } else {
-            console.log('Hello');
         }
-    }
+
+
+        // Form data setup : 
+        const formData = new FormData();
+        formData.append("restaurantName", restaurantInfo.restaurantName);
+        formData.append("city", restaurantInfo.city);
+        formData.append("country", restaurantInfo.country);
+        formData.append("deliveryTime", restaurantInfo.deliveryTime.toString());
+        formData.append("cuisines", JSON.stringify(restaurantInfo.cuisines));
+        formData.append("description", restaurantInfo.description);
+        // edge case for restaurant image: 
+        if (restaurantInfo.imageURL) {
+            formData.append("imageURL", restaurantInfo.imageURL);
+        }
+
+
+        //Restauran api implementation : 
+        try {
+            // check restaurant.if already available then update the restaurant : 
+            if (restaurant) {
+                await updateRestaurant(formData);
+            } else {
+                // Create a restaurant, if the restaurant is not assigned: 
+                await createRestaurant(formData);
+            }
+        } catch (error: any) {
+            console.log("Restaurant error -> ", error);
+        }
+    };
+
+    useEffect(() => {
+        const infos = async () => {
+            await getRestaurant();
+            if (restaurant) {
+                setRestaurantInfo({
+                    restaurantName: restaurant?.restaurantName || "",
+                    city: restaurant?.city || "",
+                    country: restaurant?.country || "",
+                    description: restaurant?.description || "",
+                    deliveryTime: restaurant?.deliveryTime || 0,
+                    cuisines: restaurant?.cuisines ? restaurant.cuisines.map((cuisine) => cuisine) : [],
+                    imageURL: restaurant?.imageURL || undefined
+                })
+            }
+        }
+        infos();
+    }, []);
+
 
 
     return (
@@ -79,7 +120,12 @@ const Restaurant = () => {
             {/* Right content  */}
             <form onSubmit={formSubmitHandle} className="mt-5 md:mr-10 flex flex-col gap-2  lg:mr-10 px-5 py-3">
 
-                <h1 className="text-2xl font-extrabold text-center ">Add Restaurant</h1>
+                {
+                    restaurant ?
+                        <h1 className="text-2xl font-extrabold text-center ">Update Restaurant</h1>
+                        :
+                        <h1 className="text-2xl font-extrabold text-center ">Add Restaurant</h1>
+                }
 
                 {/* Restaurant name  */}
                 <div className="w-full">
@@ -87,15 +133,15 @@ const Restaurant = () => {
                     <input
                         type="text"
 
-                        name="restaurant_name"
+                        name="restaurantName"
                         placeholder="Enter restaurant name"
                         className="py-1 px-2 w-full outline-none border-b-2"
-                        value={restaurantInfo.restaurant_name}
+                        value={restaurantInfo.restaurantName}
                         onChange={inputChangeHandle}
                     />
                     {
                         formError &&
-                        <p className="text-red-500 text-sm">{formError.restaurant_name}</p>
+                        <p className="text-red-500 text-sm">{formError.restaurantName}</p>
                     }
                 </div>
 
@@ -104,15 +150,15 @@ const Restaurant = () => {
                     <Label>Restaurant city </Label>
                     <input type="text"
 
-                        name="restaurant_city"
+                        name="city"
                         placeholder="Enter restaurant city"
                         className="py-1 px-2 w-full outline-none border-b-2"
-                        value={restaurantInfo.restaurant_city}
+                        value={restaurantInfo.city}
                         onChange={inputChangeHandle}
                     />
                     {
                         formError &&
-                        <p className="text-red-500 text-sm">{formError.restaurant_city}</p>
+                        <p className="text-red-500 text-sm">{formError.city}</p>
                     }
                 </div>
 
@@ -121,15 +167,15 @@ const Restaurant = () => {
                     <Label>Restaurant country </Label>
                     <input type="text"
 
-                        name="restaurant_country"
+                        name="country"
                         placeholder="Enter restaurant country"
                         className="py-1 px-2 w-full outline-none border-b-2"
-                        value={restaurantInfo.restaurant_country}
+                        value={restaurantInfo.country}
                         onChange={inputChangeHandle}
                     />
                     {
                         formError &&
-                        <p className="text-red-500 text-sm">{formError.restaurant_country}</p>
+                        <p className="text-red-500 text-sm">{formError.country}</p>
                     }
                 </div>
 
@@ -138,15 +184,15 @@ const Restaurant = () => {
                     <Label>Delivery time </Label>
                     <input type="number"
 
-                        name="delivery_time"
+                        name="deliveryTime"
                         placeholder="Enter delivery time"
                         className="py-1 px-2 w-full outline-none border-b-2"
-                        value={restaurantInfo.delivery_time}
+                        value={restaurantInfo.deliveryTime}
                         onChange={inputChangeHandle}
                     />
                     {
                         formError &&
-                        <p className="text-red-500 text-sm">{formError.delivery_time}</p>
+                        <p className="text-red-500 text-sm">{formError.deliveryTime}</p>
                     }
                 </div>
 
@@ -192,16 +238,45 @@ const Restaurant = () => {
                         type="file"
 
                         className=""
-                        name="restaurant_image"
+                        name="imageURL"
                         onChange={fileChangeHandle}
                         accept="image/*"
                     />
                     {
                         formError &&
-                        <p>{formError.restaurant_image?.name || "Image is required!"}</p>
+                        <p>{formError.imageURL?.name}</p>
                     }
                 </div>
-                <Button type="submit" className="bg-blue-500 hover:bg-blue-600 w-full mt-5">Add Restaurant</Button>
+
+                {
+                    restaurant ?
+
+                        <div className="">
+                            {
+                                loading ?
+                                    <Button disabled type="submit" className="bg-blue-500 flex items-center gap-1 justify-center hover:bg-blue-600 w-full mt-5">
+                                        <Loader className="animate-spin" />
+                                        <p>Updating..</p>
+                                    </Button>
+                                    :
+                                    <Button type="submit" className="bg-blue-500 active:scale-[98%] transition-all hover:bg-blue-600 w-full mt-5">Update Restaurant</Button>
+                            }
+                        </div>
+                        :
+                        <div className="">
+                            {
+                                loading ?
+                                    <Button disabled type="submit" className="bg-blue-500 flex items-center gap-1 justify-center hover:bg-blue-600 w-full mt-5">
+                                        <Loader className="animate-spin" />
+                                        <p>Loading..</p>
+                                    </Button>
+                                    :
+                                    <Button type="submit" className="bg-blue-500 hover:bg-blue-600 w-full mt-5">Add Restaurant</Button>
+                            }
+                        </div>
+                }
+
+
             </form >
         </div >
     )
