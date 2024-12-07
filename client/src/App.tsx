@@ -1,9 +1,9 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { Suspense, lazy } from "react";
+import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
+import React, { Suspense, lazy, useEffect } from "react";
 import Layout from "./components/layout/Layout";
-
-
-
+import { Toaster } from "sonner";
+import { useUserStore } from "./store/userStore";
+import Loader from "./components/loader/Loader";
 
 const Home = lazy(() => import("./pages/Home"));
 const Signup = lazy(() => import("./auth/Signup"));
@@ -22,11 +22,62 @@ const AvailableMenus = lazy(() => import('./pages/admin/AvailableMenus'));
 const Order = lazy(() => import('./pages/admin/Order'));
 
 
+
+
+
+// Protected routes : 
+
+// 1. User protected routes :
+const IsUserAuthenticated = ({ children }: { children: React.ReactNode }) => {
+
+  const { isAuthenticated } = useUserStore();
+
+  if (isAuthenticated) {
+    return <Navigate to={'/'} replace />
+  }
+  return <>{children}</>
+};
+
+
+const IsUserAccessed = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated } = useUserStore();
+  if (!isAuthenticated) {
+    return <Navigate to={'/login'} replace />
+  }
+  return <>{children}</>
+}
+
+
+// 2. Admin protected routes : 
+const IsAdmin = ({ children }: { children: React.ReactNode }) => {
+  // Check if the user is available : 
+  const { user } = useUserStore();
+  if (!user) {
+    return <Navigate to={'/'} replace />
+  }
+  // Check if the user is admin or not : 
+  if (!user.admin) {
+    return <Navigate to={'/'} replace />
+  }
+  return <>{children}</>
+}
+
+
+
+
+
+
+
+
+
+
+
+
 const router = createBrowserRouter([
   {
     path: "/",
     element: (
-      <Suspense fallback={<div>Loading..</div>}>
+      <Suspense fallback={<Loader />}>
         <Layout />
       </Suspense>
     ),
@@ -35,7 +86,7 @@ const router = createBrowserRouter([
         index: true,
 
         element: (
-          <Suspense fallback={<div>Loading..</div>}>
+          <Suspense fallback={<Loader />}>
             <Home />
           </Suspense>
         ),
@@ -43,23 +94,28 @@ const router = createBrowserRouter([
       {
         path: "signup",
         element: (
-          <Suspense fallback={<div>Loading..</div>}>
-            <Signup />
-          </Suspense>
+          <IsUserAuthenticated>
+            <Suspense fallback={<Loader />}>
+              <Signup />
+            </Suspense>
+          </IsUserAuthenticated>
         ),
       },
       {
         path: "login",
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
-            <Login />
-          </Suspense>
+          //Wrapping login with ProtectedUserRoutes routes: 
+          <IsUserAuthenticated>
+            <Suspense fallback={<Loader />}>
+              <Login />
+            </Suspense>
+          </IsUserAuthenticated>
         ),
       },
       {
         path: "forget-password",
         element: (
-          <Suspense fallback={<div>Loading..</div>}>
+          <Suspense fallback={<Loader />}>
             <ForgetPassword />
           </Suspense>
         )
@@ -67,15 +123,16 @@ const router = createBrowserRouter([
       {
         path: "reset-password",
         element: (
-          <Suspense fallback={<div>Loading..</div>}>
+          <Suspense fallback={<Loader />}>
             <ResetPassword />
           </Suspense>
+
         )
       },
       {
         path: "verify-email",
         element: (
-          <Suspense fallback={<div>Loading..</div>}>
+          <Suspense fallback={<Loader />}>
             <VerifyEmail />
           </Suspense>
         )
@@ -83,15 +140,17 @@ const router = createBrowserRouter([
       {
         path: 'profile',
         element: (
-          <Suspense fallback={<div>Loading..</div>}>
-            <Profile />
-          </Suspense>
+          <IsUserAccessed>
+            <Suspense fallback={<Loader />}>
+              <Profile />
+            </Suspense>
+          </IsUserAccessed>
         )
       },
       {
         path: 'search/:id',
         element: (
-          <Suspense fallback={<div>Loading..</div>}>
+          <Suspense fallback={<Loader />}>
             <Search />
           </Suspense>
         )
@@ -107,15 +166,17 @@ const router = createBrowserRouter([
       {
         path: 'cart',
         element: (
-          <Suspense fallback={<div>Loading..</div>}>
-            <Cart />
-          </Suspense>
+          <IsUserAccessed>
+            <Suspense fallback={<Loader />}>
+              <Cart />
+            </Suspense>
+          </IsUserAccessed>
         )
       },
       {
         path: "checkout-popup-modal",
         element: (
-          <Suspense fallback={<div>Loading..</div>}>
+          <Suspense fallback={<Loader />}>
             <CheckoutPopupModal />
           </Suspense >
         )
@@ -125,25 +186,31 @@ const router = createBrowserRouter([
       {
         path: 'admin/restaurant',
         element: (
-          <Suspense fallback={<div>Loading..</div>}>
-            <Restaurant />
-          </Suspense>
+          <IsAdmin>
+            <Suspense fallback={<Loader />}>
+              <Restaurant />
+            </Suspense>
+          </IsAdmin>
         )
       },
       {
         path: 'admin/available-menu',
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
-            <AvailableMenus />
-          </Suspense>
+          <IsAdmin>
+            <Suspense fallback={<Loader />}>
+              <AvailableMenus />
+            </Suspense>
+          </IsAdmin>
         )
       },
       {
         path: 'admin/order',
         element: (
-          <Suspense fallback={<div>Loading..</div>}>
-            <Order />
-          </Suspense>
+          <IsAdmin>
+            <Suspense fallback={<Loader />}>
+              <Order />
+            </Suspense>
+          </IsAdmin>
         )
       }
     ],
@@ -151,10 +218,16 @@ const router = createBrowserRouter([
 ]);
 
 
+
 const App = () => {
+  const { chekAuthByCookie } = useUserStore();
+
+
+
   return (
     <>
       <RouterProvider router={router} />
+      <Toaster />
     </>
   );
 };
