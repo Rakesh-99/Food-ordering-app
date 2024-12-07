@@ -18,8 +18,8 @@ export type DropDownTypes = {
 }
 
 export type MenuDetailTypes = {
-    menu_name: string,
-    menu_price: number,
-    imageFile: string,
-    menu_description: string
+    name: string,
+    price: number,
+    image: string,
+    description: string
 }
