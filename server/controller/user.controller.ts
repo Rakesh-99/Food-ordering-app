@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import userModel from "../models/user.model";
-import bcrypt from 'bcrypt';
+import bcryptjs from 'bcryptjs';
 import { ErrorHandler } from "../utils/ErrorHandler";
 import asyncErrorHandler from 'express-async-handler';
 import createJwtToken from "../utils/jwtTokenAndCookies";
@@ -43,7 +43,7 @@ export const userSignup = asyncErrorHandler(async (req: Request, res: Response, 
     }
 
     // Hash the plain password coming from req body: 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcryptjs.hash(password, 10);
 
     // create a six digit verification code  : 
     const verificationCode = Math.floor(100000 + Math.random() * 200000).toString();
@@ -111,7 +111,7 @@ export const userLogin = asyncErrorHandler(async (req: Request, res: Response, n
 
     // compare both password : 
 
-    const isPasswordMatch = await bcrypt.compare(password, isUserExist.password);
+    const isPasswordMatch = await bcryptjs.compare(password, isUserExist.password);
 
     // Check if the passwords are matching or not : 
 
@@ -205,7 +205,7 @@ export const resetPassword = asyncErrorHandler(async (req: Request, res: Respons
     // If the token matched with Database token then create a password and convert it into hash format: 
 
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcryptjs.hash(password, 10);
 
     // update in db 
 
@@ -266,7 +266,7 @@ export const updateUserProfile = asyncErrorHandler(async (req: Request, res: Res
     let hashedPassword;
     // If password available convert it into hash : 
     if (password) {
-        hashedPassword = await bcrypt.hash(password, 10);
+        hashedPassword = await bcryptjs.hash(password, 10);
     }
 
     // Update the userDetails : 
