@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, query, Request, Response } from 'express';
 import restaurantModel from "../models/restaurant.model";
 import asyncErrorHandler from 'express-async-handler';
 import userModel from '../models/user.model';
@@ -202,116 +202,49 @@ export const updateOrderStaus = asyncErrorHandler(async (req: Request, res: Resp
 })
 
 
-
-// Search restaurant : 
-// export const searchRestaurant = asyncErrorHandler(async (req: Request, res: Response, next: NextFunction): Promise<any> => {
-
-//     const searchParamsText = req.params.searchParamsText || ""
-//     const searchQuery = req.query.searchQuery || "";
-//     const getCuisines = (req.query.getCuisines! as string || "").split(",").map((cuisines) => cuisines);
-
-//     const queryData: any = {};
-//     // Search restaurant based on search text : 
-//     if (searchParamsText) {
-//         console.log('Params -', searchParamsText);
-
-//         queryData.$or = [
-//             {
-//                 restaurantName: {
-//                     $regex: searchParamsText,
-//                     $options: 'i'
-//                 }
-//             },
-//             {
-//                 city: {
-//                     $regex: searchParamsText,
-//                     $options: 'i'
-//                 }
-//             },
-//             {
-//                 country: {
-//                     $regex: searchParamsText,
-//                     $options: 'i'
-//                 }
-//             }
-//         ]
-//     }
-//     // Filter restaurant based on the quires:
-//     if (searchQuery) {
-//         console.log("Query - ", searchQuery);
-//         queryData.$or = [
-//             {
-//                 restaurantName: {
-//                     $regex: searchQuery,
-//                     $options: 'i'
-//                 },
-//             },
-//             {
-//                 cuisines: {
-//                     $regex: searchQuery,
-//                     $options: 'i'
-//                 }
-//             }
-//         ]
-//     }
-//     if (getCuisines.length > 0) {
-//         console.log(getCuisines);
-//         queryData.cuisines = { $in: getCuisines }
-//     }
-
-//     const result = await restaurantModel.find(queryData);
-
-//     // If queryData is empty, return an error
-//     if (Object.keys(queryData).length === 0) {
-//         return next(new ErrorHandler(400, "Invalid search parameters."));
-//     }
-
-//     if (!result || result.length < 1) {
-//         return next(new ErrorHandler(404, "No Restaurant found!"));
-//     }
-//     console.log("The query Data is -", queryData);
-
-//     return res.status(200).json({ success: true, message: "Restaurants have been fetched", restaurants: result });
-// });
-
+// Searh restaurant api :
 export const searchRestaurant = asyncErrorHandler(async (req: Request, res: Response, next: NextFunction): Promise<any> => {
-    const searchParamsText = req.params.searchParamsText || "";
-    const searchQuery = req.query.searchQuery || "";
-    const getCuisines = (req.query.getCuisines! as string || "").split(",").map((cuisines) => cuisines);
+    const searchParamsText = req.params.searchParamsText;
+    const searchQuery = req.query.searchQuery;
+    const getCuisines = (req.query.getCuisines! as string || "").split(",").map((cuisines) => cuisines.trim());
 
 
-    const queryData: any = {};
+    const fetchData = [];
 
-    // Searching in params : 
+    // Search through params : 
     if (searchParamsText) {
-        queryData.$or = [
+        fetchData.push(
             { restaurantName: { $regex: searchParamsText, $options: "i" } },
-            { country: { $regex: searchParamsText, $options: "i" } },
-            { city: { $regex: searchParamsText, $options: "i" } }
-        ]
+            { city: { $regex: searchParamsText, $options: "i" } },
+            { country: { $regex: searchParamsText, $options: "i" } }
+        )
     }
 
-    // Searching in queries : 
+    // Search through query: 
     if (searchQuery) {
-        queryData.$or = [
+        fetchData.push(
             { restaurantName: { $regex: searchQuery, $options: "i" } },
             { cuisines: { $regex: searchQuery, $options: "i" } }
-        ]
+        )
     }
-
-    // Searching in cuisines : 
+    // search in cuisines : 
     if (getCuisines.length > 0) {
-        queryData.cuisines = { $in: getCuisines }
+        fetchData.push(
+            { cuisines: { $in: getCuisines } }
+        )
     }
 
+    const restaurants = await restaurantModel.find({ $or: fetchData })
 
-    const result = await restaurantModel.find(queryData);
-
-    if (!result || result.length < 1) {
-        return next(new ErrorHandler(404, "No restaurants found."));
+    if (restaurants.length === 0) {
+        return next(new ErrorHandler(404, "No restaurant found"));
     }
 
-    return res.status(200).json({ success: true, message: "Restaurants fetched.", restaurants: result });
+    return res.status(200).json({
+        success: true,
+        message: `${restaurants.length} restaurants found`,
+        restaurants: restaurants
+    })
 });
 
 
