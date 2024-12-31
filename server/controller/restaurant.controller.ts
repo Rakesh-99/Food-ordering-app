@@ -204,46 +204,48 @@ export const updateOrderStaus = asyncErrorHandler(async (req: Request, res: Resp
 
 // Searh restaurant api :
 export const searchRestaurant = asyncErrorHandler(async (req: Request, res: Response, next: NextFunction): Promise<any> => {
-    const searchParamsText = req.params.searchParamsText;
-    const searchQuery = req.query.searchQuery;
-    const getCuisines = (req.query.getCuisines! as string || "").split(",").map((cuisines) => cuisines.trim());
 
+    const paramsText = req.params.searchParamsText || "";
+    const queryText = req.query.searchQuery || "";
+    const cuisineValues = (req.query.getCuisines as string || "").split(",").filter((cuisine) => cuisine);
 
-    const fetchData = [];
+    // Perform search operations : 
+    const searchCriteria: any = {};
 
-    // Search through params : 
-    if (searchParamsText) {
-        fetchData.push(
-            { restaurantName: { $regex: searchParamsText, $options: "i" } },
-            { city: { $regex: searchParamsText, $options: "i" } },
-            { country: { $regex: searchParamsText, $options: "i" } }
-        )
+    // Search restaurants through params : 
+    if (paramsText) {
+        searchCriteria.$or = [
+            { restaurantName: { $regex: paramsText, $options: "i" } },
+            { city: { $regex: paramsText, $options: "i" } },
+            { country: { $regex: paramsText, $options: "i" } }
+        ]
+    };
+
+    //Search through query : 
+    if (queryText) {
+        searchCriteria.$or = [
+            { restaurantName: { $regex: queryText, $options: "i" } },
+            { cuisines: { $regex: queryText, $options: "i" } }
+        ]
     }
 
-    // Search through query: 
-    if (searchQuery) {
-        fetchData.push(
-            { restaurantName: { $regex: searchQuery, $options: "i" } },
-            { cuisines: { $regex: searchQuery, $options: "i" } }
-        )
-    }
-    // search in cuisines : 
-    if (getCuisines.length > 0) {
-        fetchData.push(
-            { cuisines: { $in: getCuisines } }
-        )
+    // Search through cuisine values : 
+    if (cuisineValues.length > 0) {
+        searchCriteria.$or = [
+            { cuisines: { $in: cuisineValues } }
+        ]
     }
 
-    const restaurants = await restaurantModel.find({ $or: fetchData })
+    const restaurants = await restaurantModel.find(searchCriteria);
 
     if (restaurants.length === 0) {
-        return next(new ErrorHandler(404, "No restaurant found"));
+        return next(new ErrorHandler(404, "No restaurant found!"));
     }
 
     return res.status(200).json({
         success: true,
-        message: `${restaurants.length} restaurants found`,
-        restaurants: restaurants
+        mesaage: `${restaurants.length} restaurants found`,
+        restaurant: restaurants
     })
 });
 
